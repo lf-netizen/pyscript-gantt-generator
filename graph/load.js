@@ -2,7 +2,7 @@
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
-var NODE_RAD = 12;
+var NODE_RAD = 20;
 var nodes = [];
 
 function resize() {
@@ -116,7 +116,7 @@ function canvas_arrow(context, fromx, fromy, tox, toy) {
   
 function draw() {
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
+    context.fillStyle = '#22cccc'
     for (let i = 0; i < edges.length; i++) {
         let fromNode = edges[i].from;
         let toNode = edges[i].to;
@@ -130,6 +130,10 @@ function draw() {
         context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
         context.strokeStyle = node.strokeStyle;
         context.fill();
+        context.fillStyle = 'black';
+        context.textAlign = 'center';
+        context.font = '30px serif';
+        context.fillText(i+1, node.x, node.y+NODE_RAD/2)
         context.stroke();
     }
 }

@@ -222,25 +222,24 @@ class PERT:
 
         data.sort_values(by=['color', 'start'], inplace=True)
 
-        plt.figure(figsize=(12,6))
-        plt.title('Gantt Chart', size=18)
-
+        fig, ax = plt.subplots(figsize=(12,6))
+        ax.set_title('Gantt Chart', size=18)
         n_colors = max(data['color']) + 1
         color = iter(plt.cm.rainbow(np.linspace(0, 1, n_colors)))
         for i in range(n_colors):
             df = data[data['color']==i]
-            plt.barh(y=df.name, left=df.start, width=df.duration,
+            ax.barh(y=df.name, left=df.start, width=df.duration,
                     alpha=1, color=next(color), zorder=2)
             if i < n_colors - 1:
                 print('Ścieżka krytyczna nr {}'.format(i+1))
                 print(df['name'].values)
         
-        plt.barh(y=data.name, left=data.start+data.duration, width=data.limit, 
+        ax.barh(y=data.name, left=data.start+data.duration, width=data.limit, 
                 alpha=0.3, color='black', height=0.5, zorder=2)
+        ax.grid(axis='x', zorder=1)
+        ax.set_xlabel('Time')
         plt.gca().invert_yaxis()
-        plt.grid(axis='x', zorder=1)
-        plt.xlabel('Time')
-        plt.show()
+        return fig
 
 
 def solve(data: pd.DataFrame):
@@ -253,5 +252,5 @@ def solve(data: pd.DataFrame):
     print('Całkowity czas przedsięwzięcia z prawdopodobieństwem 90% wyniesie \
 nie więcej niż {}.'.format(ans))    
     print('Wariancja wyniosła {}.'.format(var))
-    p.plot(data)
+    return p.plot(data)
     
