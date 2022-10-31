@@ -2,6 +2,7 @@
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
+var NODE_RAD = 12;
 var nodes = [];
 
 function resize() {
@@ -79,7 +80,7 @@ function up(e) {
         let node = {
             x: e.x,
             y: e.y,
-            radius: 14,
+            radius: NODE_RAD,
             fillStyle: '#22cccc',
             strokeStyle: '#009999',
             selectedFill: '#88aaaa',
@@ -96,17 +97,30 @@ function up(e) {
 
 var edges = [];
 
+function canvas_arrow(context, fromx, fromy, tox, toy) {
+    var headlen = 30; // length of head in pixels
+    var head_angle = 12;
+    var dx = tox - fromx;
+    var dy = toy - fromy;
+    var angle = Math.atan2(dy, dx);
+    context.beginPath();
+    context.moveTo(fromx, fromy);
+    context.lineTo(tox - NODE_RAD*Math.cos(angle), toy-NODE_RAD*Math.sin(angle));
+    context.stroke();
+    context.beginPath();
+    context.lineTo(tox - headlen * Math.cos(angle - Math.PI / head_angle), toy - headlen * Math.sin(angle - Math.PI / head_angle));
+    context.lineTo(tox - NODE_RAD*Math.cos(angle), toy-NODE_RAD*Math.sin(angle));
+    context.lineTo(tox - headlen * Math.cos(angle + Math.PI / head_angle), toy - headlen * Math.sin(angle + Math.PI / head_angle));
+    context.fill();
+  }
+  
 function draw() {
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
     for (let i = 0; i < edges.length; i++) {
         let fromNode = edges[i].from;
         let toNode = edges[i].to;
-        context.beginPath();
-        context.strokeStyle = fromNode.strokeStyle;
-        context.moveTo(fromNode.x, fromNode.y);
-        context.lineTo(toNode.x, toNode.y);
-        context.stroke();
+        canvas_arrow(context, fromNode.x, fromNode.y, toNode.x, toNode.y);
     }
 
     for (let i = 0; i < nodes.length; i++) {
