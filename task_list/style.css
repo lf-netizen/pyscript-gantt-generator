@@ -6,8 +6,8 @@ body {
   }
   .container {
     display: block;
-    width: 400px;
-    margin: 100px auto 0;
+    width: 550px;
+    margin: 50px auto 0;
   }
   ul {
     margin: 0;
@@ -58,6 +58,7 @@ body {
     font-family: Lato, sans-serif;
     color: #888;
   }
+
   input[type="text"]:focus {
     color: #333;
   }
@@ -70,6 +71,12 @@ body {
   input#new-task {
     float: left;
     width: 318px;
+    margin-left: 0;
+    margin-right: 20px;
+  }
+  input#new-task-time {
+    float: left;
+    width: 150px;
     margin-left: 0;
   }
   p > button:hover {
@@ -87,16 +94,21 @@ body {
     position: relative;
     width: 30px;
   }
+  .time {
+    margin: 0 10px;
+    position: relative;
+    width: 70px;
+  }
   li > label {
     font-size: 18px;
     line-height: 40px;
-    width: 260px;
+    width: 250px;
     padding: 0 0 0 11px;
     word-wrap: normal;
     word-break: break-all;
   }
   li >  input[type="text"] {
-    width: 226px;
+    width: 256px;
   }
   li > .delete:hover {
     color: #CF2323;
@@ -115,9 +127,15 @@ body {
   
   ul li.editMode input[type=text] {
     display:block;
-    margin: 10px 0 10px 40px;
+    margin: 10px 0 10px 60px;
   }
   
   ul li.editMode label {
     display:none;
+  }
+  .editTime {
+    margin-left: 10px !important;
+    margin-right: 27px !important;
+    position: relative;
+    width: 70px !important;
   }

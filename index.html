@@ -18,7 +18,12 @@
 
 </head>
 <body>
-    <iframe id="graph_iframe" width=50% height=50% src=graph/index.html></iframe>
+    <div style="display: inline-block; width: 30%;">
+        <iframe id="list_iframe"  width="100%" height=500px allign="left" src=task_list/index.html></iframe>
+    </div>
+    <div style="display: inline-block; width: 60%;">
+        <iframe id="graph_iframe"  width="100%" height=500px allign="right" src=graph/index.html></iframe>
+    </div>
     <p id="example"></p>
     <div id="plot"></div>
     <py-script output="example">
@@ -29,7 +34,7 @@
     def click_event(*ags, **kwgs):
         header.element.innerText = edges.to_py()
     </py-script>
-    <py-script src="main.py" output="plot"></py-script>
+    <!-- <py-script src="main.py" output="plot"></py-script> -->
     
     <py-button id="new-task-btn" label="edges state!">
         def on_click(evt):

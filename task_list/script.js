@@ -1,21 +1,21 @@
-//Problem: user interaction doesn't provide desired results
-//Solution: add interactivity so the user can manage daily tasks.
-
 var taskInput = document.getElementById("new-task"); // new-task
+var taskInputTime = document.getElementById("new-task-time"); // new-task
 var addButton = document.getElementsByTagName("button")[0];//first button
 var incompleteTasksHolder = document.getElementById("incomplete-tasks"); //incomplete-tasks
 
 //New Task List item
 
-var createNewTaskElement = function(taskString) {
+var createNewTaskElement = function(taskString, taskTime) {
 	// create List Item
   var listItem = document.createElement("li");
   // input checkbox
   var numeration = document.createElement("label");
   // label
   var label = document.createElement("label");
+  var time = document.createElement("label");
   // input (text)
   var editInput = document.createElement("input");
+  var editTime = document.createElement("input");
   // button.edit
   var editButton = document.createElement("button");
   // button.delete
@@ -24,10 +24,16 @@ var createNewTaskElement = function(taskString) {
   //Each element needs modified 
   
   numeration.setAttribute("for", "numeration");
-  numeration.classList.add("numeration")
+  numeration.classList.add("numeration");
   numeration.innerText = String(incompleteTasksHolder.getElementsByTagName("li").length + 1) + '.';
-
+  
+  time.classList.add("time");
+  time.innerText = taskTime;
+  
   editInput.type = "text";
+  
+  editTime.type = "text";
+  editTime.classList.add("editTime");
   
   editButton.innerText = "Edit";
   editButton.className = "edit";
@@ -39,7 +45,9 @@ var createNewTaskElement = function(taskString) {
   // Each element needs appending
   listItem.appendChild(numeration);
   listItem.appendChild(label);
+  listItem.appendChild(time);
   listItem.appendChild(editInput);
+  listItem.appendChild(editTime);
   listItem.appendChild(editButton);
   listItem.appendChild(deleteButton);
 
@@ -54,11 +62,16 @@ var addTask = function() {
     //   return
     // }
   //Create a new list item with the text from the #new-task:
-  var listItem = createNewTaskElement(taskInput.value);
+  var listItem = createNewTaskElement(taskInput.value, taskInputTime.value);
   //Append listItem to incompleteTaskHolder
   incompleteTasksHolder.appendChild(listItem);
   bindTaskEvents(listItem, taskCompleted);
   taskInput.value = "";
+  taskInputTime.value = "";
+
+  // add corresponding node
+  var add_node = parent.document.getElementById('graph_iframe').contentWindow.add_node
+  add_node(incompleteTasksHolder.children.length)
 }
 
 //Edit an existing task
@@ -68,7 +81,9 @@ var editTask = function() {
 var listItem = this.parentNode;
   
 var editInput = listItem.querySelector("input[type=text]");
+var editTime = listItem.getElementsByClassName("editTime")[0];
 var label = listItem.getElementsByTagName("label")[1];
+var time = listItem.getElementsByTagName("label")[2];
   
 var containsClass = listItem.classList.contains("editMode");
   
@@ -78,10 +93,12 @@ var containsClass = listItem.classList.contains("editMode");
       //Switch from .editMode
       //label text become the input's value
       label.innerText = editInput.value;
+      time.innerText = editTime.value;
   } else {
       //Switch to .editMode
       //input value becomes the labels text
      	editInput.value = label.innerText;
+     	editTime.value = time.innerText;
   }
   //Toggle .editMode on the parent 
   listItem.classList.toggle("editMode");
@@ -93,13 +110,18 @@ var deleteTask = function () {
 		//Remove the parent list item from the ul
   	var listItem = this.parentNode;
   	var ul = listItem.parentNode;
+    var num = listItem.getElementsByTagName("label")[0].innerText;
   
   	ul.removeChild(listItem);
 
+    num = listItem.getElementsByClassName("numeration")[0].innerText
     nums = document.getElementsByClassName("numeration")
     for(var i = 0; i < nums.length; i++) {
       nums[i].innerText = String(i+1) + "."
     }
+
+    var delete_node = parent.document.getElementById('graph_iframe').contentWindow.delete_node
+    delete_node(parseInt(num))
 }
 
 //Mark a task as complete

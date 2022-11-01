@@ -13,15 +13,6 @@ function resize() {
 window.onresize = resize;
 resize();
 
-function drawNode(node) {
-    context.beginPath();
-    context.fillStyle = node.fillStyle;
-    context.arc(node.x, node.y, node.radius, 0, Math.PI * 2, true);
-    context.strokeStyle = node.strokeStyle;
-    context.stroke();
-    context.fill();
-}
-
 var selection = undefined;
 
 function within(x, y) {
@@ -75,19 +66,62 @@ function down(e) {
     }
 }
 
+ function add_node(num) {
+    x = 30;
+    y = 30;
+    while (within(x, y)) {
+        x += 2.5 * NODE_RAD;
+    }
+    let node = {
+        x: x,
+        y: y,
+        radius: NODE_RAD,
+        fillStyle: '#ffffff',
+        strokeStyle: '#000000',
+        selectedFill: '#dddddd',
+        selected: false,
+        num: num
+    };
+    nodes.push(node);
+    draw();
+}
+
+function delete_node(num) {
+    var i = edges.length;
+    while(i--) {
+        let edge = edges[i];
+        if ((edge.from.num == num) || (edge.to.num == num)) {
+            edges.splice(i, 1);
+        }
+    }
+    idx_to_del = undefined;
+    for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].num > num) {
+            nodes[i].num -= 1;
+        }
+        else if (nodes[i].num == num) {
+            idx_to_del = i;
+        }
+    }
+    nodes.splice(idx_to_del, 1)
+    draw()
+
+}
+
 function up(e) {
     if (!selection) {
-        let node = {
-            x: e.x,
-            y: e.y,
-            radius: NODE_RAD,
-            fillStyle: '#22cccc',
-            strokeStyle: '#009999',
-            selectedFill: '#88aaaa',
-            selected: false
-        };
-        nodes.push(node);
-        draw();
+        // let node = {
+        //     x: e.x,
+        //     y: e.y,
+        //     radius: NODE_RAD,
+        //     fillStyle: '#22cccc',
+        //     strokeStyle: '#009999',
+        //     selectedFill: '#88aaaa',
+        //     selected: false,
+        //     num:nodes.length + 1
+        // };
+        // nodes.push(node);
+        // draw();
     }
     if (selection && !selection.selected) {
         selection = undefined;
@@ -116,7 +150,7 @@ function canvas_arrow(context, fromx, fromy, tox, toy) {
   
 function draw() {
     context.clearRect(0, 0, window.innerWidth, window.innerHeight);
-    context.fillStyle = '#22cccc'
+    context.fillStyle = '#000000'
     for (let i = 0; i < edges.length; i++) {
         let fromNode = edges[i].from;
         let toNode = edges[i].to;
@@ -133,7 +167,7 @@ function draw() {
         context.fillStyle = 'black';
         context.textAlign = 'center';
         context.font = '30px serif';
-        context.fillText(i+1, node.x, node.y+NODE_RAD/2)
+        context.fillText(node.num, node.x, node.y+NODE_RAD/2)
         context.stroke();
     }
 }
@@ -141,5 +175,3 @@ function draw() {
 window.onmousemove = move;
 window.onmousedown = down;
 window.onmouseup = up;
-
-
