@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Dict
 import js
+import math
 
 class Activity:
     def __init__(self, i, j, tc, tm, tp):
@@ -257,4 +258,38 @@ nie więcej niż {}.'.format(ans))
     
 def read_data():
     edges = js.document.getElementById("graph_iframe").contentWindow.edges.to_py()
-    edges = js.document.getElementById('task-list').to_py()
+    nodes_weights = js.document.getElementById('list_iframe').contentWindow.getInfo().to_py()
+    if np.any([math.isnan(w) for w in nodes_weights]):
+        return 'nan in time'
+    nodes_weights = [0] + nodes_weights
+
+    num_nodes = len(nodes_weights)
+    graph_matrix = np.empty((num_nodes, num_nodes))
+    graph_matrix[:] = np.nan
+
+    for edge in edges:
+        src = edge['from']['num']
+        dst = edge['to']['num']
+        graph_matrix[src, dst] = nodes_weights[dst]
+
+
+    graph_isnan = np.isnan(graph_matrix)
+    for i in range(1, num_nodes):
+        if np.all(graph_isnan[:, i]):
+            graph_matrix[0, i] = nodes_weights[i]
+    print(graph_matrix)
+    
+    graph_isnan = np.isnan(graph_matrix)
+    input_data = []
+    for src in range(num_nodes):
+        for dst in range(1, num_nodes):
+            if graph_isnan[src, dst]:
+                continue
+            record = [str(dst)+'.', src, dst if not np.all(graph_isnan[dst, :]) else num_nodes] + 3 * [nodes_weights[dst]]
+            input_data.append(record) 
+    
+    return np.array(input_data)
+    # print(only_src, only_dst)
+
+
+

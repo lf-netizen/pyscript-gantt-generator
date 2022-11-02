@@ -1,4 +1,4 @@
-from src import solve
+from src import solve, read_data
 import numpy as np
 import pandas as pd
 

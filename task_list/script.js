@@ -172,7 +172,7 @@ var getInfo = function() {
   let list_tasks = document.getElementsByTagName('li');
   for(let i = 0; i < list_tasks.length; i++) {
     let inputs = list_tasks[i].getElementsByTagName('label');
-    output.push({num: parseInt(inputs[0].innerText), time: parseFloat(inputs[2].innerText)})
+    output.push(parseFloat(inputs[2].innerText));
   }
   return output
 }
