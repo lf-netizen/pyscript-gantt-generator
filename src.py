@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import List, Dict
+import js
 
 class Activity:
     def __init__(self, i, j, tc, tm, tp):
@@ -254,3 +255,6 @@ nie więcej niż {}.'.format(ans))
     print('Wariancja wyniosła {}.'.format(var))
     return p.plot(data)
     
+def read_data():
+    edges = js.document.getElementById("graph_iframe").contentWindow.edges.to_py()
+    edges = js.document.getElementById('task-list').to_py()

@@ -1,7 +1,7 @@
 var taskInput = document.getElementById("new-task"); // new-task
 var taskInputTime = document.getElementById("new-task-time"); // new-task
 var addButton = document.getElementsByTagName("button")[0];//first button
-var incompleteTasksHolder = document.getElementById("incomplete-tasks"); //incomplete-tasks
+var incompleteTasksHolder = document.getElementById("task-list"); //task-list
 
 //New Task List item
 
@@ -138,7 +138,7 @@ var taskCompleted = function() {
 //Mark a task as incomplete
 var taskIncomplete = function() {
   console.log("Task Incomplete...");
- 	//When the checkbox is unchecked appendTo #incomplete-tasks
+ 	//When the checkbox is unchecked appendTo #task-list
   var listItem = this.parentNode;
   incompleteTasksHolder.appendChild(listItem);
   bindTaskEvents(listItem, taskCompleted);
@@ -165,4 +165,14 @@ var bindTaskEvents = function(taskListItem, checkBoxEventHandler) {
 for (var i = 0; i < incompleteTasksHolder.children.length; i ++) {
   //bind events to list item's children (taskCompleted)	
   bindTaskEvents(incompleteTasksHolder.children[i], taskCompleted);
+}
+
+var getInfo = function() {
+  let output = [];
+  let list_tasks = document.getElementsByTagName('li');
+  for(let i = 0; i < list_tasks.length; i++) {
+    let inputs = list_tasks[i].getElementsByTagName('label');
+    output.push({num: parseInt(inputs[0].innerText), time: parseFloat(inputs[2].innerText)})
+  }
+  return output
 }

@@ -29,10 +29,10 @@
     <py-script output="example">
     import js
     header = Element("example")
-    edges = js.document.getElementById("graph_iframe").contentWindow.edges;
 
     def click_event(*ags, **kwgs):
-        header.element.innerText = edges.to_py()
+        header.element.innerText = str(js.document.getElementById("graph_iframe").contentWindow.edges.to_py()) \
+        + str('\n') + str(js.document.getElementById('list_iframe').contentWindow.getInfo().to_py())
     </py-script>
     <!-- <py-script src="main.py" output="plot"></py-script> -->
     
