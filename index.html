@@ -24,24 +24,26 @@
     <div style="display: inline-block; width: 60%;">
         <iframe id="graph_iframe"  width="100%" height=500px allign="right" src=graph/index.html></iframe>
     </div>
-    <p id="example"></p>
+    <div id="example"></div>
     <div id="plot"></div>
     <py-script output="example">
-    import js
-    import src
-    header = Element("example")
-
-    def click_event(*ags, **kwgs):
-        header.element.innerText = str(js.document.getElementById("graph_iframe").contentWindow.edges.to_py()) \
-        + str('\n') + str(js.document.getElementById('list_iframe').contentWindow.getInfo().to_py())
-
-        print(src.read_data())
+        import js
+        import src
+        header = Element("example")
+        
+        def click_event(*ags, **kwgs):
+            header.element.innerText = str(js.document.getElementById("graph_iframe").contentWindow.edges.to_py()) \
+            + str('\n') + str(js.document.getElementById('list_iframe').contentWindow.getInfo().to_py())
+            return
     </py-script>
-    <!-- <py-script src="main.py" output="plot"></py-script> -->
     
-    <py-button id="new-task-btn" label="edges state!">
+    <py-button id="new-task-btn" label="edges state">
         def on_click(evt):
           click_event()
+      </py-button>
+    <py-button id="new-btn" label="calc">
+        def on_click(evt):
+            Element('plot').write(src.solve(src.read_data()), append=False)
       </py-button>
     
 </body>
