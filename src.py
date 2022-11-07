@@ -41,7 +41,7 @@ class PERT:
         self.activities[(t.i, t.j)] = t
 
     def create_from_data(self, data: pd.DataFrame) -> None:
-        events = max(data['dst'])
+        events = max(data['dst'].max(), data['src'].max())
         m = np.zeros((events, events), dtype=int)
         for s, d in zip(data['src'], data['dst']):
             m[s-1][d-1] = 1
@@ -211,6 +211,8 @@ class PERT:
         data['duration'] = duration
         data['limit'] = limit
 
+        data = data[data['duration'] > 0].copy()
+        
         data['color'] = len(self.paths)
         for it, path in enumerate(self.paths):
             for i in range(len(path) - 1):
@@ -261,10 +263,10 @@ def read_data():
     nodes_weights = js.document.getElementById('list_iframe').contentWindow.getInfo().to_py()
     if np.any([math.isnan(w) for w in nodes_weights]):
         return 'nan in time'
-    nodes_weights = [0] + nodes_weights
+    nodes_weights = [0] + nodes_weights + [0]
 
     num_nodes = len(nodes_weights)
-    graph_matrix = np.empty((num_nodes, num_nodes))
+    graph_matrix = np.empty((num_nodes-1, num_nodes))
     graph_matrix[:] = np.nan
 
     for edge in edges:
@@ -274,22 +276,32 @@ def read_data():
 
 
     graph_isnan = np.isnan(graph_matrix)
-    for i in range(1, num_nodes):
+    for i in range(1, num_nodes-1):
         if np.all(graph_isnan[:, i]):
             graph_matrix[0, i] = nodes_weights[i]
+        if np.all(graph_isnan[i, :]):
+            graph_matrix[i, -1] = 0
     print(graph_matrix)
     
     graph_isnan = np.isnan(graph_matrix)
     input_data = []
-    for src in range(num_nodes):
-        for dst in range(1, num_nodes):
-            if graph_isnan[src, dst]:
-                continue
-            record = [str(dst)+'.', src, dst if not np.all(graph_isnan[dst, :]) else num_nodes] + 3 * [nodes_weights[dst]]
-            input_data.append(record) 
+    free_dst_idx = num_nodes + 1
+    for dst in range(1, num_nodes):
+        srcs = np.argwhere(~graph_isnan[:, dst]).flatten()
+        if len(srcs) > 1:
+            for src in srcs:
+                record = [str(dst)+'.', src+1, free_dst_idx+1] + 3 * [0]
+                input_data.append(record)
+            record = [str(dst)+'.', free_dst_idx+1, dst+1] + 3 * [nodes_weights[dst]]
+            input_data.append(record)
+            free_dst_idx += 1
+        else:
+            record = [str(dst)+'.', srcs[0]+1, dst+1] + 3 * [nodes_weights[dst]]
+            input_data.append(record)
     
-    return np.array(input_data)
-    # print(only_src, only_dst)
+    output =  pd.DataFrame(np.array(input_data), columns=['name', 'src', 'dst', 'tc', 'tm', 'tp'])
+    print(output)
+    return output
 
 
 
