@@ -68,7 +68,7 @@ function down(e) {
 
  function add_node(num) {
     x = 30;
-    y = 30;
+    y = 140;
     while (within(x, y)) {
         x += 2.5 * NODE_RAD;
     }

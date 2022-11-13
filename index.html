@@ -6,8 +6,8 @@
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="style.css" type="text/css" media="screen" charset="utf-8">
     <script defer type="text/javascript" src="load.js"></script>
-    
     <py-env>
         - matplotlib
         - pandas
@@ -18,30 +18,15 @@
 
 </head>
 <body>
-    <div style="display: inline-block; width: 30%;">
-        <iframe id="list_iframe"  width="100%" height=500px allign="left" src=task_list/index.html></iframe>
-    </div>
-    <div style="display: inline-block; width: 60%;">
-        <iframe id="graph_iframe"  width="100%" height=500px allign="right" src=graph/index.html></iframe>
+    
+    <div style=" display: flex; align-items: center; justify-content: center; height: 90%;">
+        <iframe frameBorder="0" id="list_iframe"  width="700px" height=100% allign="center" src=task_list/index.html></iframe>
+        <iframe frameBorder="0" id="graph_iframe"  style="width: calc(100% - 700px)" height=100% allign="center" src=graph/index.html></iframe>
     </div>
     <div id="example"></div>
-    <div id="plot"></div>
-    <py-script output="example">
-        import js
-        import src
-        header = Element("example")
-        
-        def click_event(*ags, **kwgs):
-            header.element.innerText = str(js.document.getElementById("graph_iframe").contentWindow.edges.to_py()) \
-            + str('\n') + str(js.document.getElementById('list_iframe').contentWindow.getInfo().to_py())
-            return
-    </py-script>
-    
-    <py-button id="new-task-btn" label="edges state">
-        def on_click(evt):
-          click_event()
-      </py-button>
+    <div id="plot" style="text-align: center;"></div>
     <py-button id="new-btn" label="calc">
+        import src
         def on_click(evt):
             Element('plot').write(src.solve(src.read_data()), append=False)
       </py-button>

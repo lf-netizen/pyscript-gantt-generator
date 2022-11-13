@@ -93,6 +93,7 @@ body {
     margin: 0 10px;
     position: relative;
     width: 30px;
+    display: inline !important;
   }
   .time {
     margin: 0 10px;
@@ -127,7 +128,7 @@ body {
   
   ul li.editMode input[type=text] {
     display:block;
-    margin: 10px 0 10px 60px;
+    margin: 10px 5px 10px 0;
   }
   
   ul li.editMode label {
