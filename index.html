@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Map</title>
+    <title>Gantt charts generator</title>
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     <link rel="stylesheet" href="index.css">
@@ -19,17 +19,23 @@
 </head>
 <body>
     
-    <div style=" display: flex; align-items: center; justify-content: center; height: 90%;">
-        <iframe frameBorder="0" id="list_iframe"  width="700px" height=100% allign="center" src=task_list/index.html></iframe>
-        <iframe frameBorder="0" id="graph_iframe"  style="width: calc(100% - 700px)" height=100% allign="center" src=graph/index.html></iframe>
+    <div style="position: fixed; left: 0; top: 0; height: 100%; width: 700px; text-align: center; border-right: 0.3mm solid; z-index: 1; background: #fff;">
+        <iframe frameBorder="0" id="list_iframe" width="100%" height=90% allign="center" src=task_list/index.html></iframe>
+        <py-button id="new-btn" label="Calculate" >
+            import src
+            import js
+            def on_click(evt):
+                Element('plot').write(src.solve(src.read_data()), append=False)
+                # js.document.getElementById("plot").scrollIntoView();
+                js.document.getElementById("plot").style.height = '110%';
+        </py-button>
     </div>
-    <div id="example"></div>
-    <div id="plot" style="text-align: center;"></div>
-    <py-button id="new-btn" label="calc">
-        import src
-        def on_click(evt):
-            Element('plot').write(src.solve(src.read_data()), append=False)
-      </py-button>
+
+    <div style="position: absolute; left: 700px; height: 90%; width: calc(100% - 700px); text-align: center;">
+        <h2>Relationship graph</h2>
+        <iframe id="graph_iframe" width="90%" height=70% allign="center" src=graph/index.html style="margin-bottom: 20px; border-color: #888888; border-style: solid; border-width: 1px; border-right-width: 1.5px;"></iframe>
+        <div id="plot" style="text-align: center; height: 0%;"></div>
+    </div>
     
 </body>
 </html>

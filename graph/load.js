@@ -27,7 +27,19 @@ function within(x, y) {
 function move(e) {
     if (selection && e.buttons) {
         selection.x = e.x;
+        if (selection.x < NODE_RAD) {
+            selection.x = NODE_RAD;
+        }
+        else if (selection.x > canvas.width - NODE_RAD) {
+            selection.x = canvas.width - NODE_RAD;
+        }
         selection.y = e.y;
+        if (selection.y < NODE_RAD) {
+            selection.y = NODE_RAD;
+        }
+        else if (selection.y > canvas.height - NODE_RAD) {
+            selection.y = canvas.height - NODE_RAD;
+        }
         draw();
     }
 }
@@ -68,7 +80,7 @@ function down(e) {
 
  function add_node(num) {
     x = 30;
-    y = 140;
+    y = 50;
     while (within(x, y)) {
         x += 2.5 * NODE_RAD;
     }
