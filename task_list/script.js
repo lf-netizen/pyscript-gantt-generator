@@ -40,6 +40,7 @@ var createNewTaskElement = function(taskString, taskTime) {
   deleteButton.innerText = "Delete";
   deleteButton.className = "delete";
   
+  label.classList.add("task_label");
   label.innerText = taskString;
   
   // Each element needs appending
@@ -62,6 +63,12 @@ var addTask = function() {
     //   return
     // }
   //Create a new list item with the text from the #new-task:
+  if (!taskInput.value) {
+    taskInput.value = taskInput.placeholder;
+  }
+  if (!taskInputTime.value) {
+    taskInputTime.value = Math.floor(Math.random() * 20) + 1;
+  }
   var listItem = createNewTaskElement(taskInput.value, taskInputTime.value);
   //Append listItem to incompleteTaskHolder
   incompleteTasksHolder.appendChild(listItem);
@@ -72,6 +79,9 @@ var addTask = function() {
   // add corresponding node
   var add_node = parent.document.getElementById('graph_iframe').contentWindow.add_node
   add_node(incompleteTasksHolder.children.length)
+
+  nums = document.getElementsByClassName("numeration")
+  taskInput.setAttribute('placeholder', 'Task ' + String(nums.length + 1))
 }
 
 //Edit an existing task
@@ -116,12 +126,18 @@ var deleteTask = function () {
 
     num = listItem.getElementsByClassName("numeration")[0].innerText
     nums = document.getElementsByClassName("numeration")
+    tasks = document.getElementsByClassName("task_label")
     for(var i = 0; i < nums.length; i++) {
       nums[i].innerText = String(i+1) + "."
+      if(tasks[i].innerText.split(' ')[0] == 'Task') {
+        tasks[i].innerText = 'Task ' + String (i+1);
+      }
     }
 
     var delete_node = parent.document.getElementById('graph_iframe').contentWindow.delete_node
     delete_node(parseInt(num))
+
+    taskInput.setAttribute('placeholder', 'Task ' + String(nums.length + 1))
 }
 
 //Mark a task as complete
