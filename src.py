@@ -92,7 +92,7 @@ class PERT:
     def _determine_min_terms(self) -> None:
         visited = set()
 
-        _, start = list(self.events.items())[0]
+        start = [e for  _, e in list(self.events.items()) if not e.pre][0]
         start.tw = 0
 
         q = [start]
@@ -120,7 +120,7 @@ class PERT:
     def _determine_max_terms(self) -> None:
         visited = set()
 
-        _, end = list(self.events.items())[-1]
+        end = [e for  _, e in list(self.events.items()) if not e.next][0]
         end.tp = end.tw
 
         q = [end]
@@ -150,8 +150,8 @@ class PERT:
                 activity.zc = next.tp - event.tw - activity.t0
 
     def _make_paths(self) -> List[List[int]]:
-        _, start = list(self.events.items())[0]
-        _, end = list(self.events.items())[-1]
+        start = [e for  _, e in list(self.events.items()) if not e.pre][0]
+        end = [e for  _, e in list(self.events.items()) if not e.next][0]
         
         self.paths = self._make_paths_recur(start, end.id, [], self.activities)
         
@@ -174,7 +174,7 @@ class PERT:
 
     def _get_total_var(self) -> float:
         var = 0
-        paths = self._make_paths()
+        self._make_paths()
         for path in self.paths:
             this_path_var = 0
             for i in range(len(path) - 1):
@@ -210,7 +210,6 @@ class PERT:
         data['start'] = start
         data['duration'] = duration
         data['limit'] = limit
-
         data = data[data['duration'] > 0].copy()
         
         data['color'] = len(self.paths)
@@ -224,19 +223,17 @@ class PERT:
                 data.loc[np.logical_and(data['src'] == src_id, 
                                         data['dst'] == dst_id), 'color'] = it
 
-        data.sort_values(by=['color', 'start'], inplace=True)
+        
+        data.sort_values(by=['name'], inplace=True)
 
         fig, ax = plt.subplots(figsize=(12,6))
         ax.set_title('Gantt Chart', size=18)
+        
         n_colors = max(data['color']) + 1
-        color = iter(plt.cm.rainbow(np.linspace(0, 1, n_colors)))
-        for i in range(n_colors):
-            df = data[data['color']==i]
-            ax.barh(y=df.name, left=df.start, width=df.duration,
-                    alpha=1, color=next(color), zorder=2)
-            if i < n_colors - 1:
-                print('Ścieżka krytyczna nr {}'.format(i+1))
-                print(df['name'].values)
+        colors = plt.cm.rainbow(np.linspace(0, 1, n_colors))
+        data['color'] = data['color'].apply(lambda i: colors[i])
+        ax.barh(y=data.name, left=data.start, width=data.duration,
+                alpha=1, color=data.color, zorder=2)
         
         ax.barh(y=data.name, left=data.start+data.duration, width=data.limit, 
                 alpha=0.3, color='black', height=0.5, zorder=2)
@@ -261,22 +258,19 @@ nie więcej niż {}.'.format(ans))
 def has_cycles(g):
     L = []
     S = []
-
     for i in range(1, g.shape[0]):
-        if np.all(~g[i, :]):
-            S.append[i]
-
+        if np.all(~g[:, i]):
+            S.append(i)
+    
     while len(S):
         n = S.pop(0)
         L.append(n)
         for m, has_edge in enumerate(g[n, :]):
-            if has_edge:
-                g[n, m] = False
-                if np.all(~g[:, m]):
-                    S.append(m)
-
-    print(g)
-    print(L)
+            if not has_edge:
+                continue
+            g[n, m] = False
+            if np.all(~g[:, m]):
+                S.append(m)
     return not np.all(~g)
 
 
@@ -284,7 +278,8 @@ def read_data():
     edges = js.document.getElementById("graph_iframe").contentWindow.edges.to_py()
     nodes_weights = js.document.getElementById('list_iframe').contentWindow.getInfo().to_py()
     if np.any([math.isnan(w) for w in nodes_weights]):
-        return 'nan in time'
+        print('nan in time')
+        return
     nodes_weights = [0] + nodes_weights + [0]
 
     num_nodes = len(nodes_weights)
@@ -296,7 +291,8 @@ def read_data():
         dst = edge['to']['num']
         graph_matrix[src, dst] = True
 
-    if has_cycles(graph_matrix):
+    if has_cycles(graph_matrix.copy()):
+        print('graph has cycle(s)')
         return
 
     for i in range(1, num_nodes-1):
@@ -305,12 +301,10 @@ def read_data():
         if np.all(~graph_matrix[i, :]):
             graph_matrix[i, -1] = True
     
-    print(graph_matrix)
     input_data = []
     free_dst_idx = num_nodes + 1
     for dst in range(1, num_nodes):
         srcs = np.argwhere(graph_matrix[:, dst]).flatten()
-        print(srcs)
         if len(srcs) > 1:
             for src in srcs:
                 record = [str(dst)+'.', src+1, free_dst_idx+1] + 3 * [0]
@@ -323,7 +317,6 @@ def read_data():
             input_data.append(record)
     
     output =  pd.DataFrame(np.array(input_data), columns=['name', 'src', 'dst', 'tc', 'tm', 'tp'])
-    print(output)
     return output
 
 

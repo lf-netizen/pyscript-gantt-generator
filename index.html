@@ -25,9 +25,16 @@
             import src
             import js
             def on_click(evt):
-                Element('plot').write(src.solve(src.read_data()), append=False)
+                input_data = src.read_data()
+                if input_data is None:
+                    Element('plot').write('Error: graph has cycle(s)')
+                    js.document.getElementById("plot").style.height = '10%';
+                    return
+                Element('plot').write(src.solve(input_data), append=False)
                 # js.document.getElementById("plot").scrollIntoView();
                 js.document.getElementById("plot").style.height = '110%';
+
+                document.getElementById('graph_iframe').contentWindow.draw()
         </py-button>
     </div>
 
