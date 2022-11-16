@@ -258,6 +258,28 @@ nie więcej niż {}.'.format(ans))
     print('Wariancja wyniosła {}.'.format(var))
     return p.plot(data)
     
+def has_cycles(g):
+    L = []
+    S = []
+
+    for i in range(1, g.shape[0]):
+        if np.all(~g[i, :]):
+            S.append[i]
+
+    while len(S):
+        n = S.pop(0)
+        L.append(n)
+        for m, has_edge in enumerate(g[n, :]):
+            if has_edge:
+                g[n, m] = False
+                if np.all(~g[:, m]):
+                    S.append(m)
+
+    print(g)
+    print(L)
+    return not np.all(~g)
+
+
 def read_data():
     edges = js.document.getElementById("graph_iframe").contentWindow.edges.to_py()
     nodes_weights = js.document.getElementById('list_iframe').contentWindow.getInfo().to_py()
@@ -274,6 +296,8 @@ def read_data():
         dst = edge['to']['num']
         graph_matrix[src, dst] = True
 
+    if has_cycles(graph_matrix):
+        return
 
     for i in range(1, num_nodes-1):
         if np.all(~graph_matrix[:, i]):
