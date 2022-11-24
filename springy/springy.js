@@ -533,6 +533,19 @@
 	};
 
 	// Find the nearest point to a particular position
+	Layout.ForceDirected.prototype.nearest_distlimit = function(pos) {
+		var min = {node: null, point: null, distance: null};
+		var t = this;
+		this.graph.nodes.forEach(function(n){
+			var point = t.point(n);
+			var distance = point.p.subtract(pos).magnitude();
+			if (distance < 1 && (min.distance === null || distance < min.distance)) {
+				min = {node: n, point: point, distance: distance};
+			}
+		});
+		return min;
+	};
+	
 	Layout.ForceDirected.prototype.nearest = function(pos) {
 		var min = {node: null, point: null, distance: null};
 		var t = this;

@@ -83,8 +83,26 @@ Copyright (c) 2010 Dennis Hotson
         jQuery(canvas).mousedown(function(e) {
             var pos = jQuery(this).offset();
             var p = fromScreen({x: e.pageX - pos.left, y: e.pageY - pos.top});
-            selected = nearest = dragged = layout.nearest(p);
-    
+            dragged = layout.nearest(p);
+            nearest = layout.nearest_distlimit(p);
+
+            // remove edge
+            if (selected !== null && selected.node !== null && nearest !== null && nearest.node !== null && nearest.node.id !==  selected.node.id) {
+                edges = graph.getEdges(selected.node, nearest.node).concat(graph.getEdges(nearest.node, selected.node));
+                if (edges.length) {
+                    edges.forEach(e => {
+                        graph.removeEdge(e);
+                    }); 
+                    selected.node = null;
+                }
+                else {
+                    graph.newEdge(selected.node, nearest.node);
+                }
+            }
+            else {
+                selected = layout.nearest_distlimit(p);
+            }
+
             if (selected.node !== null) {
                 dragged.point.m = 10000.0;
     
@@ -92,6 +110,8 @@ Copyright (c) 2010 Dennis Hotson
                     nodeSelected(selected.node);
                 }
             }
+
+
     
             renderer.start();
         });
@@ -110,7 +130,7 @@ Copyright (c) 2010 Dennis Hotson
         jQuery(canvas).mousemove(function(e) {
             var pos = jQuery(this).offset();
             var p = fromScreen({x: e.pageX - pos.left, y: e.pageY - pos.top});
-            nearest = layout.nearest(p);
+            nearest = layout.nearest_distlimit(p);
     
             if (dragged !== null && dragged.node !== null) {
                 dragged.point.p.x = p.x;
@@ -163,7 +183,7 @@ Copyright (c) 2010 Dennis Hotson
             } else {
                 if (this.data.image.src in nodeImages && nodeImages[this.data.image.src].loaded) {
                     height = getImageHeight(this);
-                } else {height = 10;}
+                } else {height = 12;}
             }
             return height;
         }
@@ -175,7 +195,7 @@ Copyright (c) 2010 Dennis Hotson
             } else {
                 if (this.data.image.src in nodeImages && nodeImages[this.data.image.src].loaded) {
                     width = getImageWidth(this);
-                } else {width = 10;}
+                } else {width = 12;}
             }
             return width;
         }
@@ -218,8 +238,8 @@ Copyright (c) 2010 Dennis Hotson
                 var s1 = toScreen(p1).add(offset);
                 var s2 = toScreen(p2).add(offset);
     
-                var boxWidth = edge.target.getWidth() + paddingX;
-                var boxHeight = edge.target.getHeight() + paddingY;
+                var boxWidth = 44 + paddingX;
+                var boxHeight = 44 + paddingY;
     
                 var intersection = intersect_line_box(s1, s2, {x: x2-boxWidth/2.0, y: y2-boxHeight/2.0}, boxWidth, boxHeight);
     
@@ -227,7 +247,7 @@ Copyright (c) 2010 Dennis Hotson
                     intersection = s2;
                 }
     
-                var stroke = (edge.data.color !== undefined) ? edge.data.color : '#000000';
+                var stroke = '#000000';
     
                 var arrowWidth;
                 var arrowLength;
@@ -235,7 +255,7 @@ Copyright (c) 2010 Dennis Hotson
                 var weight = (edge.data.weight !== undefined) ? edge.data.weight : 1.0;
     
                 ctx.lineWidth = Math.max(weight *  2, 0.1);
-                arrowWidth = 1 + ctx.lineWidth;
+                arrowWidth = 2 + ctx.lineWidth;
                 arrowLength = 8;
     
                 var directional = (edge.data.directional !== undefined) ? edge.data.directional : true;
@@ -261,10 +281,10 @@ Copyright (c) 2010 Dennis Hotson
                     ctx.translate(intersection.x, intersection.y);
                     ctx.rotate(Math.atan2(y2 - y1, x2 - x1));
                     ctx.beginPath();
-                    ctx.moveTo(-arrowLength, arrowWidth);
+                    ctx.moveTo(-2*arrowLength, 2*arrowWidth);
                     ctx.lineTo(0, 0);
-                    ctx.lineTo(-arrowLength, -arrowWidth);
-                    ctx.lineTo(-arrowLength * 0.8, -0);
+                    ctx.lineTo(-2*arrowLength, -2*arrowWidth);
+                    ctx.lineTo(-arrowLength * 1.6, -0);
                     ctx.closePath();
                     ctx.fill();
                     ctx.restore();
@@ -311,15 +331,23 @@ Copyright (c) 2010 Dennis Hotson
                 ctx.clearRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
     
                 // fill background
-                if (selected !== null && selected.node !== null && selected.node.id === node.id) {
-                    ctx.fillStyle = "#FFFFE0";
-                } else if (nearest !== null && nearest.node !== null && nearest.node.id === node.id) {
-                    ctx.fillStyle = "#EEEEEE";
-                } else {
-                    ctx.fillStyle = "#FFFFFF";
-                }
-                ctx.fillRect(s.x - boxWidth/2, s.y - boxHeight/2, boxWidth, boxHeight);
-    
+                ctx.beginPath()
+                    // selected
+                    if (selected !== null && selected.node !== null && selected.node.id === node.id) {
+                        ctx.fillStyle = "#aaaaaa";
+                    }
+                    // nearest when selected
+                    else if (selected !== null && selected.node !== null && nearest !== null && nearest.node !== null && nearest.node.id === node.id) {
+                        ctx.fillStyle = "#ddffdd";
+                    }
+                    // default
+                    else {
+                        ctx.fillStyle = "#ffffff";
+                    }
+                ctx.arc(s.x, s.y, 22, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = "#000000";
+                ctx.stroke()  
                 if (node.data.image == undefined) {
                     ctx.textAlign = "left";
                     ctx.textBaseline = "top";
