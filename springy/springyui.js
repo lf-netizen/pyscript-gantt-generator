@@ -338,7 +338,12 @@ Copyright (c) 2010 Dennis Hotson
                     }
                     // nearest when selected
                     else if (selected !== null && selected.node !== null && nearest !== null && nearest.node !== null && nearest.node.id === node.id) {
-                        ctx.fillStyle = "#ddffdd";
+                        if (graph.getEdges(selected.node, nearest.node).concat(graph.getEdges(nearest.node, selected.node)).length) {
+                            ctx.fillStyle = "#ffdddd";
+                        }
+                        else {
+                            ctx.fillStyle = "#ddffdd";
+                        }
                     }
                     // default
                     else {

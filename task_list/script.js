@@ -3,8 +3,9 @@ var taskInputTime = document.getElementById("new-task-time"); // new-task
 var addButton = document.getElementsByTagName("button")[0];//first button
 var incompleteTasksHolder = document.getElementById("task-list"); //task-list
 
-//New Task List item
+var graph = parent.document.getElementById('graph_iframe').contentWindow.graph
 
+//New Task List item
 var createNewTaskElement = function(taskString, taskTime) {
 	// create List Item
   var listItem = document.createElement("li");
@@ -77,8 +78,9 @@ var addTask = function() {
   taskInputTime.value = "";
 
   // add corresponding node
-  var add_node = parent.document.getElementById('graph_iframe').contentWindow.add_node
-  add_node(incompleteTasksHolder.children.length)
+  // var add_node = parent.document.getElementById('graph_iframe').contentWindow.add_node
+  // add_node(incompleteTasksHolder.children.length)
+  graph.newNode({label: String(incompleteTasksHolder.children.length)});
 
   nums = document.getElementsByClassName("numeration")
   taskInput.setAttribute('placeholder', 'Task ' + String(nums.length + 1))
@@ -133,9 +135,14 @@ var deleteTask = function () {
         tasks[i].innerText = 'Task ' + String (i+1);
       }
     }
-
-    var delete_node = parent.document.getElementById('graph_iframe').contentWindow.delete_node
-    delete_node(parseInt(num))
+    num_label = num.slice(0, -1);
+    graph.filterNodes(function(node) {return node.data.label !== num_label});
+    graph.nodes.forEach(e => {
+      var label = parseInt(e.data.label)
+      if (label > parseInt(num.slice(0, -1)))
+        e.data.label = String(label - 1);
+    });
+    // graph.removeNode({label: num.slice(0, -1)})
 
     taskInput.setAttribute('placeholder', 'Task ' + String(nums.length + 1))
 }
