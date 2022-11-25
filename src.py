@@ -275,7 +275,9 @@ def has_cycles(g):
 
 
 def read_data():
-    edges = js.document.getElementById("graph_iframe").contentWindow.edges.to_py()
+    graph = js.document.getElementById("graph_iframe").contentWindow.graph.to_py()
+    edges = graph.edges
+    js.console.log(edges)
     nodes_weights = js.document.getElementById('list_iframe').contentWindow.getInfo().to_py()
     if np.any([math.isnan(w) for w in nodes_weights]):
         print('nan in time')
@@ -287,8 +289,8 @@ def read_data():
     graph_matrix[:] = False
 
     for edge in edges:
-        src = edge['from']['num']
-        dst = edge['to']['num']
+        src = edge.source.data.label
+        dst = edge.target.data.label
         graph_matrix[src, dst] = True
 
     if has_cycles(graph_matrix.copy()):
