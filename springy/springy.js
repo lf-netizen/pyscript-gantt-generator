@@ -339,10 +339,54 @@
 		this.edgeSprings = {}; // keep track of springs associated with edges
 	};
 
+	Layout.ForceDirected.prototype.fixMass = function() {
+		for (const key of Object.keys(this.nodePoints)) {
+			this.nodePoints[key].m = 1000;
+		  }
+	};
+	Layout.ForceDirected.prototype.autolocate = function() {
+		// topological sort
+		var adj_lst = structuredClone(this.graph.adjacency);
+		var L = [];
+		var S = new Set(Object.keys(this.graph.nodeSet));
+
+		Object.values(adj_lst).forEach(function(adj) {
+			Object.keys(adj).forEach(function(dst) {
+				S.delete(dst);
+			})
+		})
+
+		while(S.size) {
+			var n = S.values().next().value;
+			S.delete(n);
+			L.push(n);
+			if(!(n in adj_lst)) {
+				adj_lst[n] = {};
+			}
+			var m_arr = Object.keys(adj_lst[n]);
+			adj_lst[n] = {};
+			var m_no_incoming = new Set(m_arr)
+			Object.values(adj_lst).forEach(function(adj) {
+				Object.keys(adj).forEach(function(dst) {
+					m_no_incoming.delete(dst);
+				})
+			})
+			S = new Set([...S, ...m_no_incoming]);
+		}
+		console.log(L);
+
+		var offset = -6;
+		for(var i = 0; i < L.length; i++) {
+			var node_point = this.nodePoints[L[i]];
+			node_point.p.x = offset + i;
+			node_point.p.y = offset + i;
+			node_point.m = 1;
+		}
+	};
 	Layout.ForceDirected.prototype.point = function(node) {
 		if (!(node.id in this.nodePoints)) {
 			var mass = (node.data.mass !== undefined) ? node.data.mass : 1.0;
-			this.nodePoints[node.id] = new Layout.ForceDirected.Point(Vector.random(), mass);
+			this.nodePoints[node.id] = new Layout.ForceDirected.Point(new Vector(-6, -6), mass);
 		}
 
 		return this.nodePoints[node.id];

@@ -87,16 +87,21 @@ Copyright (c) 2010 Dennis Hotson
             nearest = layout.nearest_distlimit(p);
 
             // remove edge
-            if (selected !== null && selected.node !== null && nearest !== null && nearest.node !== null && nearest.node.id !==  selected.node.id) {
-                edges = graph.getEdges(selected.node, nearest.node).concat(graph.getEdges(nearest.node, selected.node));
-                if (edges.length) {
-                    edges.forEach(e => {
-                        graph.removeEdge(e);
-                    }); 
-                    selected.node = null;
+            if (selected !== null && selected.node !== null && nearest !== null && nearest.node !== null) {
+                if (nearest.node.id !==  selected.node.id) {
+                    edges = graph.getEdges(selected.node, nearest.node).concat(graph.getEdges(nearest.node, selected.node));
+                    if (edges.length) {
+                        edges.forEach(e => {
+                            graph.removeEdge(e);
+                        }); 
+                        selected.node = null;
+                    }
+                    else {
+                        graph.newEdge(selected.node, nearest.node);
+                    }
                 }
                 else {
-                    graph.newEdge(selected.node, nearest.node);
+                    selected.node = null;
                 }
             }
             else {
@@ -120,8 +125,7 @@ Copyright (c) 2010 Dennis Hotson
         jQuery(canvas).dblclick(function(e) {
             var pos = jQuery(this).offset();
             var p = fromScreen({x: e.pageX - pos.left, y: e.pageY - pos.top});
-            selected = layout.nearest(p);
-            node = selected.node;
+            node = layout.nearest(p).node;
             if (node && node.data && node.data.ondoubleclick) {
                 node.data.ondoubleclick();
             }

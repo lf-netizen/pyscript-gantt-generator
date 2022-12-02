@@ -12,6 +12,10 @@ var graph = new Springy.Graph();
 jQuery(function(){
   var springy = window.springy = jQuery('#springydemo').springy({
     graph: graph,
+    stiffness: 1000,
+    repulsion: 500,
+    damping: 0.6,
+    minEnergyThreshold: 0.001
   });
 });
 </script>
