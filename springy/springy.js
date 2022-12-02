@@ -52,6 +52,15 @@
 		this.nextNodeId = 0;
 		this.nextEdgeId = 0;
 		this.eventListeners = [];
+
+		let start_node = {label: "", render:false};
+		let end_node = {label: "", render:false};
+		
+		this.newNodeStartEnd(start_node)
+		this.newNodeStartEnd(end_node)
+		
+		this.start_node = this.nodes[0];
+		this.end_node = this.nodes[1];
 	};
 
 	var Node = Springy.Node = function(id, data) {
@@ -145,9 +154,18 @@
 		}
 	};
 
+	Graph.prototype.newNodeStartEnd = function(data) {
+		var node = new Node(this.nextNodeId++, data);
+		this.addNode(node);
+		return node;
+	};
+
 	Graph.prototype.newNode = function(data) {
 		var node = new Node(this.nextNodeId++, data);
 		this.addNode(node);
+		
+		this.newEdge(this.start_node, node, {render: false})
+		this.newEdge(node, this.end_node, {render: false})
 		return node;
 	};
 
@@ -337,6 +355,9 @@
 
 		this.nodePoints = {}; // keep track of points associated with nodes
 		this.edgeSprings = {}; // keep track of springs associated with edges
+		
+		this.nodePoints[0] = new Layout.ForceDirected.Point(new Vector(-10, 0), 1000);
+		this.nodePoints[1] = new Layout.ForceDirected.Point(new Vector(10, 0), 1000);
 	};
 
 	Layout.ForceDirected.prototype.fixMass = function() {
@@ -459,6 +480,9 @@
 			this.eachNode(function(n2, point2) {
 				if (point1 !== point2)
 				{
+					// if (n1.id === this.graph.start_node.id || node.id === this.graph.end_node.id) {
+					// 	return
+					// }
 					var d = point1.p.subtract(point2.p);
 					var distance = d.magnitude() + 0.1; // avoid massive forces at small distances (and divide by zero)
 					var direction = d.normalise();
@@ -493,16 +517,21 @@
 
 	Layout.ForceDirected.prototype.updateVelocity = function(timestep) {
 		this.eachNode(function(node, point) {
+			if (node.id === this.graph.start_node.id || node.id === this.graph.end_node.id) {
+				point.v = new Vector(0,0);
+				point.a = new Vector(0,0);
+				return
+			}
 			// Is this, along with updatePosition below, the only places that your
 			// integration code exist?
 			point.v = point.v.add(point.a.multiply(timestep)).multiply(this.damping);
 			if (point.v.magnitude() > this.maxSpeed) {
-			    point.v = point.v.normalise().multiply(this.maxSpeed);
+				point.v = point.v.normalise().multiply(this.maxSpeed);
 			}
 			point.a = new Vector(0,0);
 		});
 	};
-
+	
 	Layout.ForceDirected.prototype.updatePosition = function(timestep) {
 		this.eachNode(function(node, point) {
 			// Same question as above; along with updateVelocity, is this all of

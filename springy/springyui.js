@@ -83,6 +83,10 @@ Copyright (c) 2010 Dennis Hotson
         jQuery(canvas).mousedown(function(e) {
             var pos = jQuery(this).offset();
             var p = fromScreen({x: e.pageX - pos.left, y: e.pageY - pos.top});
+            temp_nearest = layout.nearest(p);
+            if (temp_nearest.node.id === 0 || temp_nearest.node.id === 1) {
+                return
+            }
             dragged = layout.nearest(p);
             nearest = layout.nearest_distlimit(p);
 
@@ -209,6 +213,9 @@ Copyright (c) 2010 Dennis Hotson
                 ctx.clearRect(0,0,canvas.width,canvas.height);
             },
             function drawEdge(edge, p1, p2) {
+                if(edge.data.render !== undefined && !edge.data.render) {
+                    return
+                }
                 var x1 = toScreen(p1).x;
                 var y1 = toScreen(p1).y;
                 var x2 = toScreen(p2).x;
@@ -317,6 +324,10 @@ Copyright (c) 2010 Dennis Hotson
     
             },
             function drawNode(node, p) {
+                if (node.data.render !== undefined && !node.data.render) {
+                    return
+                }
+
                 var s = toScreen(p);
     
                 ctx.save();
