@@ -213,9 +213,9 @@ Copyright (c) 2010 Dennis Hotson
                 ctx.clearRect(0,0,canvas.width,canvas.height);
             },
             function drawEdge(edge, p1, p2) {
-                if(edge.data.render !== undefined && !edge.data.render) {
-                    return
-                }
+                // if(edge.data.render !== undefined && !edge.data.render) {
+                //     return
+                // }
                 var x1 = toScreen(p1).x;
                 var y1 = toScreen(p1).y;
                 var x2 = toScreen(p2).x;
@@ -324,9 +324,9 @@ Copyright (c) 2010 Dennis Hotson
     
             },
             function drawNode(node, p) {
-                if (node.data.render !== undefined && !node.data.render) {
-                    return
-                }
+                // if (node.data.render !== undefined && !node.data.render) {
+                //     return
+                // }
 
                 var s = toScreen(p);
     

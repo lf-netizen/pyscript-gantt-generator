@@ -397,10 +397,10 @@
 		console.log(L);
 
 		var offset = -6;
-		for(var i = 0; i < L.length; i++) {
+		for(var i = 1; i < L.length-1; i++) {
 			var node_point = this.nodePoints[L[i]];
 			node_point.p.x = offset + i;
-			node_point.p.y = offset + i;
+			node_point.p.y = 0 //offset + i;
 			node_point.m = 1;
 		}
 	};
