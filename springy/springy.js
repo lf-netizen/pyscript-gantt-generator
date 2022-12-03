@@ -95,6 +95,26 @@
 		return node;
 	};
 
+	Graph.prototype.isSrcOnly = function(node) {
+		for (let i = 0; i < this.edges.length; i++) {
+			let e = this.edges[i];
+			if (e.target.id === node.id && e.source.id !== this.start_node.id) {
+				return false;
+			}
+		} 
+		return true;
+	};
+	
+	Graph.prototype.isDstOnly = function(node) {
+		for (let i = 0; i < this.edges.length; i++) {
+			let e = this.edges[i];
+			if (e.source.id === node.id && e.target.id !== this.end_node.id) {
+				return false;
+			}
+		}
+		return true;
+	};
+
 	Graph.prototype.addNodes = function() {
 		// accepts variable number of arguments, where each argument
 		// is a string that becomes both node identifier and label
@@ -122,14 +142,16 @@
 			this.adjacency[edge.source.id][edge.target.id] = [];
 		}
 
-		exists = false;
-		this.adjacency[edge.source.id][edge.target.id].forEach(function(e) {
-				if (edge.id === e.id) { exists = true; }
-		});
+		// exists = false;
+		// // this.adjacency[edge.source.id][edge.target.id].forEach(function(e) {
+		// // 		if (edge.id === e.id) { exists = true; }
+		// // });
+		// this allows only one edge between nodes
+		// let exists = this.adjacency[edge.source.id][edge.target.id].length > 0;
 
-		if (!exists) {
+		// if (!exists) {
 			this.adjacency[edge.source.id][edge.target.id].push(edge);
-		}
+		// }
 
 		this.notify();
 		return edge;
@@ -170,9 +192,12 @@
 	};
 
 	Graph.prototype.newEdge = function(source, target, data) {
-		var edge = new Edge(this.nextEdgeId++, source, target, data);
-		this.addEdge(edge);
-		return edge;
+		// if the edge exists skip creating a new one
+		if (!( this.adjacency[source.id] !== undefined &&  this.adjacency[source.id][target.id] !== undefined && this.adjacency[source.id][target.id].length > 0)) {
+			var edge = new Edge(this.nextEdgeId++, source, target, data);
+			this.addEdge(edge);
+			return edge;
+		}
 	};
 
 
@@ -365,7 +390,7 @@
 			this.nodePoints[key].m = 1000;
 		  }
 	};
-	Layout.ForceDirected.prototype.autolocate = function() {
+	Layout.ForceDirected.prototype.autolayout = function() {
 		// topological sort
 		var adj_lst = structuredClone(this.graph.adjacency);
 		var L = [];
@@ -400,7 +425,7 @@
 		for(var i = 1; i < L.length-1; i++) {
 			var node_point = this.nodePoints[L[i]];
 			node_point.p.x = offset + i;
-			node_point.p.y = 0 //offset + i;
+			node_point.p.y = offset + i;
 			node_point.m = 1;
 		}
 	};

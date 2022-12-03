@@ -95,12 +95,30 @@ Copyright (c) 2010 Dennis Hotson
                 if (nearest.node.id !==  selected.node.id) {
                     edges = graph.getEdges(selected.node, nearest.node).concat(graph.getEdges(nearest.node, selected.node));
                     if (edges.length) {
+                        // remove edge with nearest
                         edges.forEach(e => {
                             graph.removeEdge(e);
                         }); 
+                        // add edges with start/end if necessary
+                        [selected.node, nearest.node].forEach( function(node) {
+                            if (graph.isSrcOnly(node)) {
+                                graph.newEdge(graph.start_node, node);
+                            }
+                            if (graph.isDstOnly(node)) {
+                                graph.newEdge(node, graph.end_node);
+                            }
+                        })
                         selected.node = null;
                     }
                     else {
+                        // remove edges with start/end if necessary
+                        if (graph.isSrcOnly(nearest.node)) {
+                            graph.removeEdge(graph.getEdges(graph.start_node, nearest.node)[0]);
+                        }
+                        if (graph.isDstOnly(selected.node)) {
+                            graph.removeEdge(graph.getEdges(selected.node, graph.end_node)[0]);
+                        }
+                        // add edge
                         graph.newEdge(selected.node, nearest.node);
                     }
                 }
@@ -120,8 +138,6 @@ Copyright (c) 2010 Dennis Hotson
                 }
             }
 
-
-    
             renderer.start();
         });
     
