@@ -53,14 +53,17 @@
 		this.nextEdgeId = 0;
 		this.eventListeners = [];
 
-		let start_node = {label: "", render:false};
-		let end_node = {label: "", render:false};
+		let start_node = {label: "", render:false, moveable: false};
+		let end_node   = {label: "", render:false, moveable: false};
+		let mid_node   = {label: "", render:false, moveable: false};
 		
 		this.newNodeStartEnd(start_node)
 		this.newNodeStartEnd(end_node)
+		this.newNodeStartEnd(mid_node)
 		
 		this.start_node = this.nodes[0];
-		this.end_node = this.nodes[1];
+		this.end_node   = this.nodes[1];
+		this.mid_node   = this.nodes[2];
 	};
 
 	var Node = Springy.Node = function(id, data) {
@@ -186,20 +189,20 @@
 		var node = new Node(this.nextNodeId++, data);
 		this.addNode(node);
 		
-		this.newEdge(this.start_node, node, {render: false})
-		this.newEdge(node, this.end_node, {render: false})
+		this.newEdge(this.start_node, node, {render: false, length: 1})
+		this.newEdge(node, this.end_node, {render: false, length: 1})
 		return node;
 	};
 
 	Graph.prototype.newEdge = function(source, target, data) {
 		// if the edge exists skip creating a new one
-		if (!( this.adjacency[source.id] !== undefined &&  this.adjacency[source.id][target.id] !== undefined && this.adjacency[source.id][target.id].length > 0)) {
-			var edge = new Edge(this.nextEdgeId++, source, target, data);
-			this.addEdge(edge);
-			return edge;
-		}
-	};
-
+		if (this.adjacency[source.id] !== undefined &&  this.adjacency[source.id][target.id] !== undefined && this.adjacency[source.id][target.id].length > 0) {
+			return;
+		};
+		var edge = new Edge(this.nextEdgeId++, source, target, data);
+		this.addEdge(edge);
+		return edge;
+	}
 
 	// add nodes and edges from JSON object
 	Graph.prototype.loadJSON = function(json) {
@@ -383,6 +386,7 @@
 		
 		this.nodePoints[0] = new Layout.ForceDirected.Point(new Vector(-10, 0), 1000);
 		this.nodePoints[1] = new Layout.ForceDirected.Point(new Vector(10, 0), 1000);
+		this.nodePoints[2] = new Layout.ForceDirected.Point(new Vector(0, 0), 1000);
 	};
 
 	Layout.ForceDirected.prototype.fixMass = function() {
@@ -390,12 +394,12 @@
 			this.nodePoints[key].m = 1000;
 		  }
 	};
-	Layout.ForceDirected.prototype.autolayout = function() {
+	Layout.ForceDirected.prototype.topological_sort = function() {
 		// topological sort
 		var adj_lst = structuredClone(this.graph.adjacency);
 		var L = [];
 		var S = new Set(Object.keys(this.graph.nodeSet));
-
+		
 		Object.values(adj_lst).forEach(function(adj) {
 			Object.keys(adj).forEach(function(dst) {
 				S.delete(dst);
@@ -419,16 +423,60 @@
 			})
 			S = new Set([...S, ...m_no_incoming]);
 		}
-		console.log(L);
 
+		for (const nbrs of Object.values(adj_lst)) {
+			if ((Object.keys(nbrs)).length !== 0) {
+				return
+			}
+		}
+		return L
+	}
+
+	Layout.ForceDirected.prototype.randomEdges = function(density=0.5) {
+		num_nodes = this.graph.nodes.length;
+
+		function shuffle(array) {
+			let currentIndex = array.length,  randomIndex;
+			
+			// While there remain elements to shuffle.
+			while (currentIndex != 0) {
+			
+				// Pick a remaining element.
+				randomIndex = Math.floor(Math.random() * currentIndex);
+				currentIndex--;
+			
+				// And swap it with the current element.
+				[array[currentIndex], array[randomIndex]] = [
+				array[randomIndex], array[currentIndex]];
+			}
+			
+			return array;
+		}
+		var node_order = shuffle(Array(num_nodes-3).fill().map((x,i)=>i+3));
+		
+
+
+	}
+
+	Layout.ForceDirected.prototype.autolayout = function() {
+		L = this.topological_sort()
+		if (L === undefined) {
+			console.log('graph has cycles')
+			return
+		}
 		var offset = -6;
 		for(var i = 1; i < L.length-1; i++) {
+			var node = this.graph.nodeSet[L[i]];
+			if (node.data.moveable !== undefined && !node.data.moveable) {
+				continue;
+			}
 			var node_point = this.nodePoints[L[i]];
 			node_point.p.x = offset + i;
-			node_point.p.y = offset + i;
+			node_point.p.y = 0 //offset + i;
 			node_point.m = 1;
 		}
 	};
+
 	Layout.ForceDirected.prototype.point = function(node) {
 		if (!(node.id in this.nodePoints)) {
 			var mass = (node.data.mass !== undefined) ? node.data.mass : 1.0;
@@ -542,7 +590,7 @@
 
 	Layout.ForceDirected.prototype.updateVelocity = function(timestep) {
 		this.eachNode(function(node, point) {
-			if (node.id === this.graph.start_node.id || node.id === this.graph.end_node.id) {
+			if (node.data.moveable !== undefined && !node.data.moveable) {
 				point.v = new Vector(0,0);
 				point.a = new Vector(0,0);
 				return
@@ -692,7 +740,7 @@
 	};
 
 	Vector.random = function() {
-		return new Vector(10.0 * (Math.random() - 0.5), 10.0 * (Math.random() - 0.5));
+		return new Vector(1.0 * (Math.random() - 0.5), 1.0 * (Math.random() - 0.5));
 	};
 
 	Vector.prototype.add = function(v2) {
