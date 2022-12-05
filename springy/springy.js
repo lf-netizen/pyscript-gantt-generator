@@ -186,6 +186,7 @@
 	};
 
 	Graph.prototype.newNode = function(data) {
+		data.mass = 10e5;
 		var node = new Node(this.nextNodeId++, data);
 		this.addNode(node);
 		
@@ -471,6 +472,12 @@
 				continue;
 			}
 			var node_point = this.nodePoints[L[i]];
+			if (this.graph.isSrcOnly(node) && this.graph.isDstOnly(node)) {
+				node_point.p.x = -10 + 1.5 * i;
+				node_point.p.y = -6 //offset + i;
+				node_point.m = 10e5;
+				continue;
+			}
 			node_point.p.x = offset + i;
 			node_point.p.y = 0 //offset + i;
 			node_point.m = 1;
@@ -480,7 +487,7 @@
 	Layout.ForceDirected.prototype.point = function(node) {
 		if (!(node.id in this.nodePoints)) {
 			var mass = (node.data.mass !== undefined) ? node.data.mass : 1.0;
-			this.nodePoints[node.id] = new Layout.ForceDirected.Point(new Vector(-6, -6), mass);
+			this.nodePoints[node.id] = new Layout.ForceDirected.Point(new Vector(-10 + 1.5 * node.id, -6), mass);
 		}
 
 		return this.nodePoints[node.id];
