@@ -24,6 +24,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
+//  import autolayout from './autolayout.js';
+
  (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
@@ -59,11 +61,11 @@
 		
 		this.newNodeStartEnd(start_node)
 		this.newNodeStartEnd(end_node)
-		this.newNodeStartEnd(mid_node)
+		// this.newNodeStartEnd(mid_node)
 		
 		this.start_node = this.nodes[0];
 		this.end_node   = this.nodes[1];
-		this.mid_node   = this.nodes[2];
+		// this.mid_node   = this.nodes[2];
 	};
 
 	var Node = Springy.Node = function(id, data) {
@@ -459,6 +461,94 @@
 
 	}
 
+	Layout.ForceDirected.prototype.autolayout_alg = function() {
+		const digl = window.crinkles.digl;
+		function positioning(
+			config,
+			nodes,
+			ranks
+		  ) {
+			const _nodes = [];
+			const _h = config.orientation === 'horizontal';
+		  
+			ranks.forEach((r, i) => {
+			  const xStart = _h
+				? 2 * config.width * i + config.x_offset
+				: -0.5 * (r.length - 1) * 2 * config.width + config.x_offset;
+			  const yStart = _h
+				? -0.5 * (r.length - 1) * 2 * config.height
+				: 2 * config.height * i;
+		  
+			  r.forEach((nodeId, nIndex) => {
+				const _node = nodes.find((n) => n.id == nodeId);
+				if (!_node) return;
+				const x = _h ? xStart : xStart + 2 * config.width * nIndex;
+				const y = _h ? yStart + 2 * config.height * nIndex : yStart;
+				_nodes.push({ ..._node, x, y });
+			  });
+			});
+		  
+			return _nodes;
+		  }
+
+		const al = function(nodes, edges_raw) {
+			// nodes: [{id: }, ]
+			// edges: [{source: id, target: id}, ]
+
+			const edges = edges_raw.map(function(e) {
+				return {source: e.source.id,target: e.target.id};
+			});
+			
+			const start_id = 0;
+			const end_id = 1;
+			const x_dist = 20;
+			const y_dist = 20;
+			const x_offset = -10;
+		  
+			const machine = digl({ shortestPath: false, addEmptySpots: true });
+			const ranks = machine.get(start_id, edges);
+			console.log(ranks)
+		  
+			const config = {  width: 1, 
+							  height: 1,
+							  orientation: 'horizontal', 
+							  x_offset: x_offset };
+			
+			let pos = positioning(config, nodes, ranks);
+			
+			const x_range = pos.find(item => item.id === end_id).x - pos.find(item => item.id === start_id).x;
+			const y_offset = Math.min(...pos.map(o => o.y));
+			const y_range = Math.max(...pos.map(o => o.y)) - y_offset;
+			const x_scale = x_dist / x_range;
+			const y_scale = y_dist / y_range;
+		  
+			let result = {};
+			pos.forEach(function(item) { 
+			  result[item.id] = { 
+				x: ((item.x - x_offset) * x_scale) + x_offset,
+				y: ((item.y - y_offset) * y_scale) - y_dist / 2
+			  };
+			});
+			
+			return result;
+		}
+		const result = al(this.graph.nodes, this.graph.edges)
+		for(var i = 2; i < Object.keys(this.nodePoints).length; i++) {
+		// var node = this.graph.nodeSet[i];
+		// if (node.data.moveable !== undefined && !node.data.moveable) {
+		// 	continue;
+		// }
+			var node_point = this.nodePoints[i];
+			node_point.p.x = result[i].x;
+			node_point.p.y = result[i].y;
+			node_point.m = 10e3;
+		}
+
+
+		console.log(result);
+
+	};
+
 	Layout.ForceDirected.prototype.autolayout = function() {
 		L = this.topological_sort()
 		if (L === undefined) {
@@ -472,12 +562,12 @@
 				continue;
 			}
 			var node_point = this.nodePoints[L[i]];
-			if (this.graph.isSrcOnly(node) && this.graph.isDstOnly(node)) {
-				node_point.p.x = -10 + 1.5 * i;
-				node_point.p.y = -6 //offset + i;
-				node_point.m = 10e5;
-				continue;
-			}
+			// if (this.graph.isSrcOnly(node) && this.graph.isDstOnly(node)) {
+			// 	node_point.p.x = -10 + 1.5 * i;
+			// 	node_point.p.y = -6 //offset + i;
+			// 	node_point.m = 1;
+			// 	continue;
+			// }
 			node_point.p.x = offset + i;
 			node_point.p.y = 0 //offset + i;
 			node_point.m = 1;
@@ -549,7 +639,7 @@
 	Layout.ForceDirected.prototype.eachSpring = function(callback) {
 		var t = this;
 		this.graph.edges.forEach(function(e){
-			callback.call(t, t.spring(e));
+			callback.call(t, t.spring(e, !e.data.render));
 		});
 	};
 
@@ -576,8 +666,14 @@
 	};
 
 	Layout.ForceDirected.prototype.applyHookesLaw = function() {
-		this.eachSpring(function(spring){
-			var d = spring.point2.p.subtract(spring.point1.p); // the direction of the spring
+		this.eachSpring(function(spring, horizontal_only=false){
+			var d = spring.point2.p.subtract(spring.point1.p);
+			// if (horizontal_only) {
+			// 	var d = spring.point2.p.subtract_horizontal(spring.point1.p);
+			// }
+			// else {
+			// 	var d = spring.point2.p.subtract_vertical(spring.point1.p); // the direction of the spring
+			// }
 			var displacement = spring.length - d.magnitude();
 			var direction = d.normalise();
 
@@ -588,10 +684,10 @@
 	};
 
 	Layout.ForceDirected.prototype.attractToCentre = function() {
-		this.eachNode(function(node, point) {
-			var direction = point.p.multiply(-1.0);
-			point.applyForce(direction.multiply(this.repulsion / 50.0));
-		});
+		// this.eachNode(function(node, point) {
+		// 	var direction = point.p.multiply(-1.0);
+		// 	point.applyForce(direction.multiply(this.repulsion / 50.0));
+		// });
 	};
 
 
@@ -756,6 +852,13 @@
 
 	Vector.prototype.subtract = function(v2) {
 		return new Vector(this.x - v2.x, this.y - v2.y);
+	};
+	
+	Vector.prototype.subtract_horizontal = function(v2) {
+		return new Vector(this.x - v2.x, 0);
+	};
+	Vector.prototype.subtract_vertical = function(v2) {
+		return new Vector(0, this.y - v2.y);
 	};
 
 	Vector.prototype.multiply = function(n) {

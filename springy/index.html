@@ -5,6 +5,7 @@
 </head>
 <body>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+<script src='bundle.js'></script>
 <script src="springy.js"></script>
 <script src="springyui.js"></script>
 <script>
@@ -12,7 +13,7 @@ var graph = new Springy.Graph();
 jQuery(function(){
   var springy = window.springy = jQuery('#springydemo').springy({
     graph: graph,
-    stiffness: 600,
+    stiffness: 300,
     repulsion: 500,
     damping: 0.3,
     minEnergyThreshold: 0.001

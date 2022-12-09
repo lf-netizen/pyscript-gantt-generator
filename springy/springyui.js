@@ -84,7 +84,7 @@ Copyright (c) 2010 Dennis Hotson
             var pos = jQuery(this).offset();
             var p = fromScreen({x: e.pageX - pos.left, y: e.pageY - pos.top});
             temp_nearest = layout.nearest(p);
-            if (temp_nearest.node.id === 0 || temp_nearest.node.id === 1 || temp_nearest.node.id === 2) {
+            if (temp_nearest.node.data.moveable !== undefined && !temp_nearest.node.data.moveable) {
                 return
             }
             dragged = layout.nearest(p);
