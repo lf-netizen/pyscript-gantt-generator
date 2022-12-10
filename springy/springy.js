@@ -270,8 +270,17 @@
 	Graph.prototype.detachNode = function(node) {
 		var tmpEdges = this.edges.slice();
 		tmpEdges.forEach(function(e) {
-			if (e.source.id === node.id || e.target.id === node.id) {
+			if (e.source.id === node.id) {
 				this.removeEdge(e);
+				if (this.isSrcOnly(e.target)) {
+					this.newEdge(this.start_node, e.target, {render: false, length: 1});
+				}
+			}
+			else if (e.target.id === node.id) {
+				this.removeEdge(e);
+				if (this.isDstOnly(e.source)) {
+					this.newEdge(e.source, this.end_node, {render: false, length: 1});
+				}
 			}
 		}, this);
 
