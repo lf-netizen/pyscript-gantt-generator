@@ -41,6 +41,10 @@ Copyright (c) 2010 Dennis Hotson
         var ctx = canvas.getContext("2d");
     
         var layout = this.layout = new Springy.Layout.ForceDirected(graph, stiffness, repulsion, damping, minEnergyThreshold);
+
+        // add mass_moveable and mass_static
+        var mass_moveable = 2;
+        var mass_static = 10e5;
     
         // calculate bounding box of graph layout.. with ease-in
         var currentBB = layout.getBoundingBox();
@@ -76,9 +80,9 @@ Copyright (c) 2010 Dennis Hotson
         };
     
         // half-assed drag and drop
-        var selected = null;
-        var nearest = null;
-        var dragged = null;
+        var selected = {node: null, point: null, distance: null};
+        var nearest = {node: null, point: null, distance: null};
+        var dragged = {node: null, point: null, distance: null};
     
         jQuery(canvas).mousedown(function(e) {
             var pos = jQuery(this).offset();
@@ -108,6 +112,8 @@ Copyright (c) 2010 Dennis Hotson
                                 graph.newEdge(node, graph.end_node, {render: false, length: 1});
                             }
                         })
+                        nearest.point.m = mass_moveable;
+                        selected.point.m = mass_moveable;
                         selected.node = null;
                     }
                     else {
@@ -120,19 +126,26 @@ Copyright (c) 2010 Dennis Hotson
                         }
                         // add edge
                         graph.newEdge(selected.node, nearest.node);
+                        nearest.point.m = mass_moveable;
                     }
                 }
                 else {
+                    selected.point.m = mass_moveable;
                     selected.node = null;
                 }
             }
             else {
-                selected = layout.nearest_distlimit(p);
+                temp_selected = layout.nearest_distlimit(p);
+                if (selected.node !== null && temp_selected.node === null) {
+                    selected.point.m = mass_moveable;
+                }
+                else if (selected.node === null && temp_selected.node !== null) {
+                    temp_selected.point.m = mass_static;
+                }
+                selected = temp_selected;
             }
-
+            
             if (selected.node !== null) {
-                dragged.point.m = 10000.0;
-    
                 if (nodeSelected) {
                     nodeSelected(selected.node);
                 }

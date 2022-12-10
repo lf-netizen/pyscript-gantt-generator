@@ -24,7 +24,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-//  import autolayout from './autolayout.js';
 
  (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
@@ -57,7 +56,6 @@
 
 		let start_node = {label: "", render:false, moveable: false};
 		let end_node   = {label: "", render:false, moveable: false};
-		let mid_node   = {label: "", render:false, moveable: false};
 		
 		this.newNodeStartEnd(start_node)
 		this.newNodeStartEnd(end_node)
@@ -188,7 +186,7 @@
 	};
 
 	Graph.prototype.newNode = function(data) {
-		data.mass = 10e5;
+		// data.mass = 10e5;
 		var node = new Node(this.nextNodeId++, data);
 		this.addNode(node);
 		
@@ -387,16 +385,22 @@
 		this.nodePoints = {}; // keep track of points associated with nodes
 		this.edgeSprings = {}; // keep track of springs associated with edges
 		
-		this.nodePoints[0] = new Layout.ForceDirected.Point(new Vector(-10, 0), 1000);
-		this.nodePoints[1] = new Layout.ForceDirected.Point(new Vector(10, 0), 1000);
-		this.nodePoints[2] = new Layout.ForceDirected.Point(new Vector(0, 0), 1000);
+		this.nodePoints[0] = new Layout.ForceDirected.Point(new Vector(-10, 0), 10e5);
+		this.nodePoints[1] = new Layout.ForceDirected.Point(new Vector(10, 0), 10e5);
 	};
 
-	Layout.ForceDirected.prototype.fixMass = function() {
+	Layout.ForceDirected.prototype.springyOff = function() {
 		for (const key of Object.keys(this.nodePoints)) {
-			this.nodePoints[key].m = 1000;
+			this.nodePoints[key].m = 10e5;
 		  }
 	};
+
+	Layout.ForceDirected.prototype.springyOn = function() {
+		for (const key of Object.keys(this.nodePoints)) {
+			this.nodePoints[key].m = 2;
+		  }
+	};
+
 	Layout.ForceDirected.prototype.topological_sort = function() {
 		// topological sort
 		var adj_lst = structuredClone(this.graph.adjacency);
@@ -491,7 +495,7 @@
 			return _nodes;
 		  }
 
-		const al = function(nodes, edges_raw) {
+		function alg(nodes, edges_raw) {
 			// nodes: [{id: }, ]
 			// edges: [{source: id, target: id}, ]
 
@@ -532,24 +536,20 @@
 			
 			return result;
 		}
-		const result = al(this.graph.nodes, this.graph.edges)
+
+		const result = alg(this.graph.nodes, this.graph.edges)
 		for(var i = 2; i < Object.keys(this.nodePoints).length; i++) {
-		// var node = this.graph.nodeSet[i];
-		// if (node.data.moveable !== undefined && !node.data.moveable) {
-		// 	continue;
-		// }
+			var node = this.graph.nodeSet[i];
+			if (node.data.moveable !== undefined && !node.data.moveable) {
+				continue;
+			}
 			var node_point = this.nodePoints[i];
 			node_point.p.x = result[i].x;
 			node_point.p.y = result[i].y;
-			node_point.m = 10e3;
 		}
-
-
-		console.log(result);
-
 	};
 
-	Layout.ForceDirected.prototype.autolayout = function() {
+	Layout.ForceDirected.prototype.autolayout_springy = function() {
 		L = this.topological_sort()
 		if (L === undefined) {
 			console.log('graph has cycles')
@@ -562,22 +562,15 @@
 				continue;
 			}
 			var node_point = this.nodePoints[L[i]];
-			// if (this.graph.isSrcOnly(node) && this.graph.isDstOnly(node)) {
-			// 	node_point.p.x = -10 + 1.5 * i;
-			// 	node_point.p.y = -6 //offset + i;
-			// 	node_point.m = 1;
-			// 	continue;
-			// }
 			node_point.p.x = offset + i;
-			node_point.p.y = 0 //offset + i;
-			node_point.m = 1;
+			node_point.p.y = Math.random() - 0.5 //offset + i;
 		}
 	};
 
 	Layout.ForceDirected.prototype.point = function(node) {
 		if (!(node.id in this.nodePoints)) {
-			var mass = (node.data.mass !== undefined) ? node.data.mass : 1.0;
-			this.nodePoints[node.id] = new Layout.ForceDirected.Point(new Vector(-10 + 1.5 * node.id, -6), mass);
+			var mass = (node.data.mass !== undefined) ? node.data.mass : 2.0;
+			this.nodePoints[node.id] = new Layout.ForceDirected.Point(new Vector(3*(Math.random()-0.5), 3*(Math.random()-0.5)), mass);
 		}
 
 		return this.nodePoints[node.id];

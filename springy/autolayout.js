@@ -51,7 +51,7 @@ function positioning(
     return _nodes;
   }
 
-window.autolayout = function(nodes, edges) {
+export default function layout_alg(nodes, edges) {
   // nodes: [{id: }, ]
   // edges: [{source: id, target: id}, ]
   const start_id = 0;
@@ -88,40 +88,4 @@ window.autolayout = function(nodes, edges) {
   return result;
 }
 
-
-console.log(autolayout(nodes, edges))
-// let nodes_coords = positioning(
-//                   { shortestPath: true, addEmptySpots: false, width: 10, height: 10, orientation: 'horizontal'},
-//                   [{id: 0}, {id: 1}, {id: 2}, {id: 3}, {id: 4}, {id: 5}, {id: 6}, {id: 10}],
-//                   // [ [ '1' ], [ '2', '3' ], [ '4' ] ]
-//                   ranks
-//                 );
-// console.log(nodes_coords)
-
-// export default function positioning(
-//     config: Config,
-//     nodes: Node[],
-//     ranks: Rank[]
-//   ): Layout {
-//     const _nodes: PositionedNode[] = [];
-//     const _h = config.orientation === 'horizontal';
-  
-//     ranks.forEach((r, i) => {
-//       const xStart = _h
-//         ? 2 * config.width * i
-//         : -0.5 * (r.length - 1) * 2 * config.width;
-//       const yStart = _h
-//         ? -0.5 * (r.length - 1) * 2 * config.height
-//         : 2 * config.height * i;
-  
-//       r.forEach((nodeId, nIndex) => {
-//         const _node: Node = nodes.find((n) => n.id == nodeId) as Node;
-//         if (!_node) return;
-//         const x = _h ? xStart : xStart + 2 * config.width * nIndex;
-//         const y = _h ? yStart + 2 * config.height * nIndex : yStart;
-//         _nodes.push({ ..._node, x, y });
-//       });
-//     });
-  
-//     return _nodes;
-//   }
+// console.log(layout_alg(nodes, edges))
