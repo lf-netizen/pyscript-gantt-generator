@@ -223,9 +223,6 @@ class PERT:
                 data.loc[np.logical_and(data['src'] == src_id, 
                                         data['dst'] == dst_id), 'color'] = it
 
-        
-        data.sort_values(by=['name'], inplace=True)
-
         fig, ax = plt.subplots(figsize=(12,6))
         ax.set_title('Gantt Chart', size=18)
         
@@ -277,23 +274,24 @@ def has_cycles(g):
 def read_data():
     graph = js.document.getElementById("graph_iframe").contentWindow.graph.to_py()
     edges = graph.edges
-    # js.console.log(edges)
     
-    nodes_weights = js.document.getElementById('list_iframe').contentWindow.getInfo().to_py()
+    task_info = js.document.getElementById('list_iframe').contentWindow.getInfo().to_py()
+    nodes_weights = task_info['weights']
+    nodes_labels = task_info['labels']
     if np.any([math.isnan(w) for w in nodes_weights]):
         print('nan in time')
         return
-    # js.console.log(nodes_weights)
     nodes_weights = [0] + nodes_weights + [0]
+    nodes_labels = [0] + nodes_labels + [0]
 
     num_nodes = len(nodes_weights)
     graph_matrix = np.empty((num_nodes-1, num_nodes), dtype=bool)
     graph_matrix[:] = False
 
     for edge in edges:
-        src = edge.source.data.label
+        src = edge.source.data.label 
         dst = edge.target.data.label
-        if src and dst:
+        if src and dst and src!= 'start' and dst != 'end':
             graph_matrix[src, dst] = True
 
     if has_cycles(graph_matrix.copy()):
@@ -312,16 +310,19 @@ def read_data():
         srcs = np.argwhere(graph_matrix[:, dst]).flatten()
         if len(srcs) > 1:
             for src in srcs:
-                record = [str(dst)+'.', src+1, free_dst_idx+1] + 3 * [0]
+                record = [dst, nodes_labels[dst], src+1, free_dst_idx+1] + 3 * [0]
                 input_data.append(record)
-            record = [str(dst)+'.', free_dst_idx+1, dst+1] + 3 * [nodes_weights[dst]]
+            record = [dst, nodes_labels[dst], free_dst_idx+1, dst+1] + 3 * [nodes_weights[dst]]
             input_data.append(record)
             free_dst_idx += 1
         else:
-            record = [str(dst)+'.', srcs[0]+1, dst+1] + 3 * [nodes_weights[dst]]
+            record = [dst, nodes_labels[dst], srcs[0]+1, dst+1] + 3 * [nodes_weights[dst]]
             input_data.append(record)
     
-    output =  pd.DataFrame(np.array(input_data), columns=['name', 'src', 'dst', 'tc', 'tm', 'tp'])
+    output =  pd.DataFrame(np.array(input_data), columns=['id', 'name', 'src', 'dst', 'tc', 'tm', 'tp'])
+    output['id'] = output.id.astype('int')
+    output.sort_values(by='id', inplace=True)
+    output.drop(columns='id', inplace=True)
     return output
 
 

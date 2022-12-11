@@ -174,8 +174,8 @@ addButton.addEventListener("click", addTask);
 
 
 var bindTaskEvents = function(taskListItem, checkBoxEventHandler) {
-  	console.log("Bind List item events");
-  	// select listitems chidlren
+  console.log("Bind List item events");
+  // select listitems chidlren
   	var checkBox = taskListItem.querySelector('input[type="checkbox"]');
     var editButton = taskListItem.querySelector("button.edit");
     var deleteButton = taskListItem.querySelector("button.delete");
@@ -183,8 +183,8 @@ var bindTaskEvents = function(taskListItem, checkBoxEventHandler) {
   	editButton.onclick = editTask;
 		//bind deleteTask to delete button
  		deleteButton.onclick = deleteTask;  
-}
-
+  }
+  
 //cycle over incompleteTaskHolder ul list items
 for (var i = 0; i < incompleteTasksHolder.children.length; i ++) {
   //bind events to list item's children (taskCompleted)	
@@ -192,11 +192,32 @@ for (var i = 0; i < incompleteTasksHolder.children.length; i ++) {
 }
 
 var getInfo = function() {
-  let output = [];
+  let output_weights = [];
+  let output_labels = [];
   let list_tasks = document.getElementsByTagName('li');
   for(let i = 0; i < list_tasks.length; i++) {
     let inputs = list_tasks[i].getElementsByTagName('label');
-    output.push(parseFloat(inputs[2].innerText));
+    output_weights.push(parseFloat(inputs[2].innerText));
+    output_labels.push(inputs[1].innerText);
   }
-  return output
+  return {'weights': output_weights, 'labels': output_labels}
 }
+
+var deleteAllButton = document.getElementsByTagName("button")[1];//first button
+var addRandomButton = document.getElementsByTagName("button")[2];//first button
+
+var deleteAllTasks = function() {
+  let delete_buttons = document.getElementsByClassName('delete');
+  for(let i = delete_buttons.length-1; i >= 0; i--) {
+    delete_buttons[i].click();  
+  }
+}
+
+var addRandomTasks = function() {
+  for (let i = 0; i < 5; i++) {
+    addTask()
+  }
+}
+
+deleteAllButton.addEventListener("click", deleteAllTasks); 
+addRandomButton.addEventListener("click", addRandomTasks); 

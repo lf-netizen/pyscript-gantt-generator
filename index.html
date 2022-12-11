@@ -20,8 +20,16 @@
 <body>
     
     <div style="position: fixed; left: 0; top: 0; height: 100%; width: 700px; text-align: center; border-right: 0.3mm solid; z-index: 1; background: #fff;">
-        <iframe frameBorder="0" id="list_iframe" width="100%" height=90% allign="center" src=task_list/index.html></iframe>
-        <py-button id="new-btn" label="Calculate" >
+        <iframe frameBorder="0" id="list_iframe" width="100%" height=90% allign="center" style="margin-bottom: 25px;" src=task_list/index.html></iframe>
+        <py-button id="random_input" label="Random input">
+            import js
+            def on_click(evt):
+                js.document.getElementById("list_iframe").contentWindow.deleteAllTasks()
+                for _ in range(2):
+                    js.document.getElementById("list_iframe").contentWindow.addRandomTasks()
+                js.document.getElementById("graph_iframe").contentWindow.springy.layout.randomEdges()
+        </py-button>
+        <py-button id="new-btn" label="Calculate">
             import src
             import js
             def on_click(evt):
@@ -33,6 +41,11 @@
                 Element('plot').write(src.solve(input_data), append=False)
                 # js.document.getElementById("plot").scrollIntoView();
                 js.document.getElementById("plot").style.height = '110%';
+        </py-button>
+        <py-button id="autolayout" label="Graph autolayout">
+            import js
+            def on_click(evt):
+                js.document.getElementById("graph_iframe").contentWindow.springy.layout.autolayout_springy()
         </py-button>
     </div>
 

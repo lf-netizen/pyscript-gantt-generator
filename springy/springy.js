@@ -54,8 +54,8 @@
 		this.nextEdgeId = 0;
 		this.eventListeners = [];
 
-		let start_node = {label: "", render:false, moveable: false};
-		let end_node   = {label: "", render:false, moveable: false};
+		let start_node = {label: "start", render:false, moveable: false};
+		let end_node   = {label: "end", render:false, moveable: false};
 		
 		this.newNodeStartEnd(start_node)
 		this.newNodeStartEnd(end_node)
@@ -272,13 +272,13 @@
 		tmpEdges.forEach(function(e) {
 			if (e.source.id === node.id) {
 				this.removeEdge(e);
-				if (this.isSrcOnly(e.target)) {
+				if (this.isSrcOnly(e.target) && e.target.id !== this.end_node.id) {
 					this.newEdge(this.start_node, e.target, {render: false, length: 1});
 				}
 			}
 			else if (e.target.id === node.id) {
 				this.removeEdge(e);
-				if (this.isDstOnly(e.source)) {
+				if (this.isDstOnly(e.source) && e.source.id !== this.start_node.id) {
 					this.newEdge(e.source, this.end_node, {render: false, length: 1});
 				}
 			}
@@ -448,8 +448,17 @@
 		return L
 	}
 
-	Layout.ForceDirected.prototype.randomEdges = function(density=0.5) {
+	Layout.ForceDirected.prototype.randomEdges = function(density=0.2) {
 		num_nodes = this.graph.nodes.length;
+
+		// delete all existing edges besides start & end
+		this.graph.filterEdges(x => false);
+		for (node of this.graph.nodes) {
+			if (node.id !== this.graph.start_node.id && node.id !== this.graph.end_node.id) {
+				this.graph.newEdge(this.graph.start_node, node, {render: false, length: 1});
+				this.graph.newEdge(node, this.graph.end_node, {render: false, length: 1});
+			}
+		}
 
 		function shuffle(array) {
 			let currentIndex = array.length,  randomIndex;
@@ -468,7 +477,26 @@
 			
 			return array;
 		}
-		var node_order = shuffle(Array(num_nodes-3).fill().map((x,i)=>i+3));
+		let node_order = shuffle(Object.keys(this.graph.nodeSet).splice(2, ))
+		console.log(node_order);
+		prob = 1 - density;
+		for (let it = 0; it < node_order.length-1; it++) {
+			let src_id = node_order[it]
+			for(dst_id of node_order.slice(it+1, )) {
+				dst_id = parseInt(dst_id);
+				if (Math.random() > prob) {
+					let src = this.graph.nodeSet[src_id];
+					let dst = this.graph.nodeSet[dst_id];
+					if (graph.isSrcOnly(dst)) {
+						graph.removeEdge(graph.getEdges(graph.start_node, dst)[0]);
+					}
+					if (graph.isDstOnly(src)) {
+						graph.removeEdge(graph.getEdges(src, graph.end_node)[0]);
+					}
+					this.graph.newEdge(src, dst);
+				}
+			}
+		}
 		
 
 
@@ -520,7 +548,6 @@
 		  
 			const machine = digl({ shortestPath: false, addEmptySpots: true });
 			const ranks = machine.get(start_id, edges);
-			console.log(ranks)
 		  
 			const config = {  width: 1, 
 							  height: 1,
@@ -547,7 +574,7 @@
 		}
 
 		const result = alg(this.graph.nodes, this.graph.edges)
-		for(var i = 2; i < Object.keys(this.nodePoints).length; i++) {
+		for(const i in Object.keys(this.graph.nodeSet).slice(2, )) {
 			var node = this.graph.nodeSet[i];
 			if (node.data.moveable !== undefined && !node.data.moveable) {
 				continue;

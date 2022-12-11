@@ -381,7 +381,7 @@ Copyright (c) 2010 Dennis Hotson
                         ctx.fillStyle = "#aaaaaa";
                     }
                     // nearest when selected
-                    else if (selected !== null && selected.node !== null && nearest !== null && nearest.node !== null && nearest.node.id === node.id) {
+                    else if (selected !== null && selected.node !== null && nearest !== null && nearest.node !== null && nearest.node.id === node.id && node.data.render === undefined && !node.data.render) {
                         if (graph.getEdges(selected.node, nearest.node).concat(graph.getEdges(nearest.node, selected.node)).length) {
                             ctx.fillStyle = "#ffdddd";
                         }
