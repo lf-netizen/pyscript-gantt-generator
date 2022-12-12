@@ -112,8 +112,8 @@ Copyright (c) 2010 Dennis Hotson
                                 graph.newEdge(node, graph.end_node, {render: false, length: 1});
                             }
                         })
-                        nearest.point.m = mass_moveable;
-                        selected.point.m = mass_moveable;
+                        nearest.point.m = layout.springyState ? mass_moveable : mass_static;
+                        selected.point.m = layout.springyState ? mass_moveable : mass_static;
                         selected.node = null;
                     }
                     else {
@@ -126,18 +126,18 @@ Copyright (c) 2010 Dennis Hotson
                         }
                         // add edge
                         graph.newEdge(selected.node, nearest.node);
-                        nearest.point.m = mass_moveable;
+                        nearest.point.m = layout.springyState ? mass_moveable : mass_static;
                     }
                 }
                 else {
-                    selected.point.m = mass_moveable;
+                    selected.point.m = layout.springyState ? mass_moveable : mass_static;
                     selected.node = null;
                 }
             }
             else {
                 temp_selected = layout.nearest_distlimit(p);
                 if (selected.node !== null && temp_selected.node === null) {
-                    selected.point.m = mass_moveable;
+                    selected.point.m = layout.springyState ? mass_moveable : mass_static;
                 }
                 else if (selected.node === null && temp_selected.node !== null) {
                     temp_selected.point.m = mass_static;

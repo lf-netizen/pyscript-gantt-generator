@@ -390,6 +390,7 @@
 		this.damping = damping; // velocity damping factor
 		this.minEnergyThreshold = minEnergyThreshold || 0.01; //threshold used to determine render stop
 		this.maxSpeed = maxSpeed || Infinity; // nodes aren't allowed to exceed this speed
+		this.springyState = true;
 
 		this.nodePoints = {}; // keep track of points associated with nodes
 		this.edgeSprings = {}; // keep track of springs associated with edges
@@ -399,12 +400,14 @@
 	};
 
 	Layout.ForceDirected.prototype.springyOff = function() {
+		this.springyState = false;
 		for (const key of Object.keys(this.nodePoints)) {
 			this.nodePoints[key].m = 10e5;
-		  }
+		}
 	};
 
 	Layout.ForceDirected.prototype.springyOn = function() {
+		this.springyState = true;
 		for (const key of Object.keys(this.nodePoints)) {
 			this.nodePoints[key].m = 2;
 		  }
@@ -478,7 +481,6 @@
 			return array;
 		}
 		let node_order = shuffle(Object.keys(this.graph.nodeSet).splice(2, ))
-		console.log(node_order);
 		prob = 1 - density;
 		for (let it = 0; it < node_order.length-1; it++) {
 			let src_id = node_order[it]
@@ -503,6 +505,11 @@
 	}
 
 	Layout.ForceDirected.prototype.autolayout_alg = function() {
+		L = this.topological_sort()
+		if (L === undefined) {
+			console.log('graph has cycles')
+			return
+		}
 		const digl = window.crinkles.digl;
 		function positioning(
 			config,
@@ -555,6 +562,8 @@
 							  x_offset: x_offset };
 			
 			let pos = positioning(config, nodes, ranks);
+			if (!pos.length)
+				return
 			
 			const x_range = pos.find(item => item.id === end_id).x - pos.find(item => item.id === start_id).x;
 			const y_offset = Math.min(...pos.map(o => o.y));
@@ -574,7 +583,7 @@
 		}
 
 		const result = alg(this.graph.nodes, this.graph.edges)
-		for(const i in Object.keys(this.graph.nodeSet).slice(2, )) {
+		for(const i of Object.keys(this.graph.nodeSet).slice(2, )) {
 			var node = this.graph.nodeSet[i];
 			if (node.data.moveable !== undefined && !node.data.moveable) {
 				continue;
@@ -605,7 +614,8 @@
 
 	Layout.ForceDirected.prototype.point = function(node) {
 		if (!(node.id in this.nodePoints)) {
-			var mass = (node.data.mass !== undefined) ? node.data.mass : 2.0;
+			default_mass = this.springyState ? 2 : 10e5;
+			var mass = (node.data.mass !== undefined) ? node.data.mass : default_mass;
 			this.nodePoints[node.id] = new Layout.ForceDirected.Point(new Vector(3*(Math.random()-0.5), 3*(Math.random()-0.5)), mass);
 		}
 

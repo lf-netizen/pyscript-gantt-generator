@@ -15,13 +15,12 @@
           - ./src.py
     </py-env>
 
-
 </head>
 <body>
     
     <div style="position: fixed; left: 0; top: 0; height: 100%; width: 700px; text-align: center; border-right: 0.3mm solid; z-index: 1; background: #fff;">
         <iframe frameBorder="0" id="list_iframe" width="100%" height=90% allign="center" style="margin-bottom: 25px;" src=task_list/index.html></iframe>
-        <py-button id="random_input" label="Random input">
+        <py-button id="random_input" label="Random input" style="margin: 10px;">
             import js
             def on_click(evt):
                 js.document.getElementById("list_iframe").contentWindow.deleteAllTasks()
@@ -29,31 +28,63 @@
                     js.document.getElementById("list_iframe").contentWindow.addRandomTasks()
                 js.document.getElementById("graph_iframe").contentWindow.springy.layout.randomEdges()
         </py-button>
-        <py-button id="new-btn" label="Calculate">
+        <py-button id="new-btn" label="Calculate" style="margin: 10px;">
             import src
             import js
             def on_click(evt):
                 input_data = src.read_data()
-                if input_data is None:
-                    Element('plot').write('Error: graph has cycle(s)')
+                if type(input_data) == type(''):
+                    Element('plot').write(f'Error: {input_data}')
                     js.document.getElementById("plot").style.height = '10%';
                     return
                 Element('plot').write(src.solve(input_data), append=False)
                 # js.document.getElementById("plot").scrollIntoView();
                 js.document.getElementById("plot").style.height = '110%';
         </py-button>
-        <py-button id="autolayout" label="Graph autolayout">
-            import js
-            def on_click(evt):
-                js.document.getElementById("graph_iframe").contentWindow.springy.layout.autolayout_springy()
-        </py-button>
     </div>
 
     <div style="position: absolute; left: 700px; height: 90%; width: calc(100% - 700px); text-align: center;">
         <h2>Relationship graph</h2>
-        <iframe id="graph_iframe" width="90%" height=70% allign="center" src=springy/index.html style="margin-bottom: 20px; border-color: #888888; border-style: solid; border-width: 1px; border-right-width: 1.5px;"></iframe>
-        <div id="plot" style="text-align: center; height: 0%;"></div>
+        <iframe id="graph_iframe" width="90%" height=70% allign="center" src=springy/index.html style="margin-bottom: 0px; border-color: #888888; border-style: solid; border-width: 1px; border-right-width: 1.5px;"></iframe>
+        
+            <div style="display: inline; justify-content: center; align-items: center; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: center;">
+                    <p style="white-space: pre;">               Static graph</p>
+                    <label class="switch" style="margin: 10px;">
+                        <input type="checkbox" id="springyswitch">
+                        <span class="slider round"></span>
+                    </label>
+                    <p>Force-directed graph</p>
+                </div> 
+                <py-button id="autolayout" label="Graph autolayout" style="position:absolute; right: 5%; top: calc(91px + 70%)">
+                    import js
+                    def on_click(evt):
+                        if js.window.springyState:
+                            js.document.getElementById("graph_iframe").contentWindow.springy.layout.autolayout_springy()
+                        else:
+                            js.document.getElementById("graph_iframe").contentWindow.springy.layout.autolayout_alg()
+                        js.document.getElementById("graph_iframe").contentWindow.document.body.focus()
+
+                </py-button>
+            </div>
+            <div id="plot" style="text-align: center; height: 0%;"></div>
     </div>
+    <script>
+        window.springyState = true;
+        document.getElementById('springyswitch').checked = true;
+    </script>
+    <script>
+        const checkbox = document.getElementById('springyswitch')
+        checkbox.addEventListener('change', (event) => {
+            window.springyState = event.currentTarget.checked;
+            if (window.springyState) {
+                document.getElementById("graph_iframe").contentWindow.springy.layout.springyOn();
+            }
+            else {
+                document.getElementById("graph_iframe").contentWindow.springy.layout.springyOff();
+            }
+        });
+    </script>
     
 </body>
 </html>

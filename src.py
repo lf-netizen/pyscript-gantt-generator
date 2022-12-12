@@ -278,9 +278,10 @@ def read_data():
     task_info = js.document.getElementById('list_iframe').contentWindow.getInfo().to_py()
     nodes_weights = task_info['weights']
     nodes_labels = task_info['labels']
+    if not nodes_weights:
+        return 'graph is empty'
     if np.any([math.isnan(w) for w in nodes_weights]):
-        print('nan in time')
-        return
+        return 'nan in time'
     nodes_weights = [0] + nodes_weights + [0]
     nodes_labels = [0] + nodes_labels + [0]
 
@@ -295,8 +296,7 @@ def read_data():
             graph_matrix[src, dst] = True
 
     if has_cycles(graph_matrix.copy()):
-        print('graph has cycle(s)')
-        return
+        return 'graph has cycle(s)'
 
     for i in range(1, num_nodes-1):
         if np.all(~graph_matrix[:, i]):
@@ -319,7 +319,7 @@ def read_data():
             record = [dst, nodes_labels[dst], srcs[0]+1, dst+1] + 3 * [nodes_weights[dst]]
             input_data.append(record)
     
-    output =  pd.DataFrame(np.array(input_data), columns=['id', 'name', 'src', 'dst', 'tc', 'tm', 'tp'])
+    output = pd.DataFrame(np.array(input_data), columns=['id', 'name', 'src', 'dst', 'tc', 'tm', 'tp'])
     output['id'] = output.id.astype('int')
     output.sort_values(by='id', inplace=True)
     output.drop(columns='id', inplace=True)

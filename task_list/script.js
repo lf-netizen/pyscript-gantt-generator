@@ -62,7 +62,6 @@ var addTask = function() {
   if (!graph) {
     graph = parent.document.getElementById('graph_iframe').contentWindow.graph;
   }
-  console.log("Add Task...");
   // if (taskInput.value === "") {
     //   return
     // }
@@ -91,7 +90,6 @@ var addTask = function() {
 
 //Edit an existing task
 var editTask = function() {
-    console.log("Edit Task...");
   
 var listItem = this.parentNode;
   
@@ -121,7 +119,6 @@ var containsClass = listItem.classList.contains("editMode");
 
 //Delete an existing task
 var deleteTask = function () {
-    console.log("Delete Task...");
 		//Remove the parent list item from the ul
   	var listItem = this.parentNode;
   	var ul = listItem.parentNode;
@@ -150,7 +147,6 @@ var deleteTask = function () {
 
 //Mark a task as complete
 var taskCompleted = function() {
-   console.log("Task Complete...");
   //When the Checkbox is checked 
   //Append the task list item to the #completed-tasks ul
    var listItem = this.parentNode;
@@ -161,7 +157,6 @@ var taskCompleted = function() {
 
 //Mark a task as incomplete
 var taskIncomplete = function() {
-  console.log("Task Incomplete...");
  	//When the checkbox is unchecked appendTo #task-list
   var listItem = this.parentNode;
   incompleteTasksHolder.appendChild(listItem);
@@ -174,7 +169,6 @@ addButton.addEventListener("click", addTask);
 
 
 var bindTaskEvents = function(taskListItem, checkBoxEventHandler) {
-  console.log("Bind List item events");
   // select listitems chidlren
   	var checkBox = taskListItem.querySelector('input[type="checkbox"]');
     var editButton = taskListItem.querySelector("button.edit");
