@@ -8,39 +8,50 @@
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="style.css" type="text/css" media="screen" charset="utf-8">
     <script defer type="text/javascript" src="load.js"></script>
-    <py-env>
-        - matplotlib
-        - pandas
-        - paths:
-          - ./src.py
-    </py-env>
+    <py-config type="toml">
+        packages = ["numpy", "matplotlib", "pandas"]
 
+        [[fetch]]
+        files = ["./src.py"]
+    </py-config>
 </head>
 <body>
     
     <div style="position: fixed; left: 0; top: 0; height: 100%; width: 700px; text-align: center; border-right: 0.3mm solid; z-index: 1; background: #fff;">
         <iframe frameBorder="0" id="list_iframe" width="100%" height=90% allign="center" style="margin-bottom: 25px;" src=task_list/index.html></iframe>
-        <py-button id="random_input" label="Random input" style="margin: 10px;">
+        <py-script>
             import js
-            def on_click(evt):
+            import src
+            from pyscript import Element
+            plot = Element('plot')
+
+            def random_input():
                 js.document.getElementById("list_iframe").contentWindow.deleteAllTasks()
                 for _ in range(2):
                     js.document.getElementById("list_iframe").contentWindow.addRandomTasks()
                 js.document.getElementById("graph_iframe").contentWindow.springy.layout.randomEdges()
-        </py-button>
-        <py-button id="new-btn" label="Calculate" style="margin: 10px;">
-            import src
-            import js
-            def on_click(evt):
+            def calculate():
+                js.document.getElementById("plot").innerHTML = '';
                 input_data = src.read_data()
                 if type(input_data) == type(''):
-                    Element('plot').write(f'Error: {input_data}')
+                    plot.write(f'Error: {input_data}')
                     js.document.getElementById("plot").style.height = '10%';
                     return
-                Element('plot').write(src.solve(input_data), append=False)
+                plot.write(src.solve(input_data), append=False)
+                #display(src.solve(input_data), target='plot', append=False)
                 # js.document.getElementById("plot").scrollIntoView();
                 js.document.getElementById("plot").style.height = '110%';
-        </py-button>
+
+            def autolayout():
+                if js.window.springyState:
+                    js.document.getElementById("graph_iframe").contentWindow.springy.layout.autolayout_springy()
+                else:
+                    js.document.getElementById("graph_iframe").contentWindow.springy.layout.autolayout_alg()
+                js.document.getElementById("graph_iframe").contentWindow.document.body.focus()
+
+        </py-script>
+        <button id="random_input" style="margin: 10px;" py-click="random_input()" class="py-button">Random input</button>
+        <button id="new-btn" style="margin: 10px;" py-click="calculate()" class="py-button">Calculate</button>
     </div>
 
     <div style="position: absolute; left: 700px; height: 90%; width: calc(100% - 700px); text-align: center;">
@@ -56,16 +67,7 @@
                     </label>
                     <p>Force-directed graph</p>
                 </div> 
-                <py-button id="autolayout" label="Graph autolayout" style="position:absolute; right: 5%; top: calc(91px + 70%)">
-                    import js
-                    def on_click(evt):
-                        if js.window.springyState:
-                            js.document.getElementById("graph_iframe").contentWindow.springy.layout.autolayout_springy()
-                        else:
-                            js.document.getElementById("graph_iframe").contentWindow.springy.layout.autolayout_alg()
-                        js.document.getElementById("graph_iframe").contentWindow.document.body.focus()
-
-                </py-button>
+                <button id="autolayout" py-click="autolayout()" style="position:absolute; right: 5%; top: calc(91px + 70%)" class="py-button">Graph autolayout</button>
             </div>
             <div id="plot" style="text-align: center; height: 0%;"></div>
     </div>

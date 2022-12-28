@@ -247,9 +247,9 @@ def solve(data: pd.DataFrame):
     p = PERT(data)
 
     ans, var = p.get_answer()
-    print('Całkowity czas przedsięwzięcia z prawdopodobieństwem 90% wyniesie \
+    js.console.log('Całkowity czas przedsięwzięcia z prawdopodobieństwem 90% wyniesie \
 nie więcej niż {}.'.format(ans))    
-    print('Wariancja wyniosła {}.'.format(var))
+    js.console.log('Wariancja wyniosła {}.'.format(var))
     return p.plot(data)
     
 def has_cycles(g):
