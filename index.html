@@ -12,7 +12,7 @@
         packages = ["numpy", "matplotlib", "pandas"]
 
         [[fetch]]
-        files = ["./src.py"]
+        files = ["./algorithm/src.py"]
     </py-config>
 </head>
 <body>
@@ -21,7 +21,7 @@
         <iframe frameBorder="0" id="list_iframe" width="100%" height=90% allign="center" style="margin-bottom: 25px;" src=task_list/index.html></iframe>
         <py-script>
             import js
-            import src
+            import algorithm.src as src
             from pyscript import Element
             plot = Element('plot')
 
