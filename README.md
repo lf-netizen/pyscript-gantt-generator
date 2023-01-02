@@ -1,6 +1,8 @@
 # Gantt chart web app
 
-<img src="img/gantt_ui.png" width=90%/ style="display: block; margin: 0 auto; margin-bottom: 15px">
+<p align="center">
+   <img src="img/gantt_ui.png" width=90%>
+</p>
 
 [Link to the app](link-to-demo)
 
@@ -13,7 +15,9 @@ CPM (*critical path method*) is a project management algorithm used for scheduli
 3. Click the 'Calculate' button.
 4. *Voilà!* Here is your Gantt Chart.
 
-<img src="img/gantt_chart.png" width=70%/ style="display: block; margin: 0 auto; margin-bottom: 15px">
+<p align="center">
+   <img src="img/gantt_chart.png" width=70%>
+</p>
 
 **Playing with the generate random input button is highly welcomed.**
 
