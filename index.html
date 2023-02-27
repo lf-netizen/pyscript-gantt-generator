@@ -7,6 +7,7 @@
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="style.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
     <script defer type="text/javascript" src="load.js"></script>
     <py-config type="toml">
         packages = ["numpy", "matplotlib", "pandas"]
@@ -16,9 +17,8 @@
     </py-config>
 </head>
 <body>
-    
     <div style="position: fixed; left: 0; top: 0; height: 100%; width: 700px; text-align: center; border-right: 0.3mm solid; z-index: 1; background: #fff;">
-        <iframe frameBorder="0" id="list_iframe" width="100%" height=90% allign="center" style="margin-bottom: 25px;" src=task_list/index.html></iframe>
+        <iframe frameBorder="0" id="list_iframe" width="100%" height=90% allign="center" src=task_list/index.html></iframe>
         <py-script>
             import js
             import algorithm.src as src
@@ -50,8 +50,11 @@
                 js.document.getElementById("graph_iframe").contentWindow.document.body.focus()
 
         </py-script>
-        <button id="random_input" style="margin: 10px;" py-click="random_input()" class="py-button">Random input</button>
-        <button id="new-btn" style="margin: 10px;" py-click="calculate()" class="py-button">Calculate</button>
+        <div style="display: flex; align-items: center; justify-content: center; flex-direction: row; height: 10%; position: relative;">
+            <a href="https://github.com/lf-netizen/pyscript-gantt-generator" style="position: absolute; left: 0;"><i class="fab fa-github" style=" font-size: 2.5rem; padding: 20px; color: black;"></i></a>
+            <button id="random_input" style="margin: 10px;" py-click="random_input()" class="py-button">Random input</button>
+            <button id="new-btn" style="margin: 10px;" py-click="calculate()" class="py-button">Calculate</button>
+        </div>
     </div>
 
     <div style="position: absolute; left: 700px; height: 90%; width: calc(100% - 700px); text-align: center;">
